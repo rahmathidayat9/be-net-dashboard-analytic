@@ -1,15 +1,24 @@
-const { Sequelize } = require('sequelize');
+const dotenv = require("dotenv");
 
-const sequelize = new Sequelize('analytic', 'analytic', 'devanalytic', {
-  host: '103.84.206.103',
-  dialect: 'postgres'
-});
+const { Sequelize } = require("sequelize");
+
+dotenv.config();
+
+const sequelize = new Sequelize(
+  process.env.DATABASE_DB,
+  process.env.DATABASE_USERNAME,
+  process.env.DATABASE_PASSWORD,
+  {
+    host: process.env.DATABASE_HOST,
+    dialect: "postgres",
+  }
+);
 
 try {
   sequelize.authenticate();
-  console.log('Connection has been established successfully.');
+  console.log("Connection has been established successfully.");
 } catch (error) {
-  console.error('Unable to connect to the database:', error);
+  console.error("Unable to connect to the database:", error);
 }
 
-module.exports = sequelize
+module.exports = sequelize;
