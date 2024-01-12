@@ -12,6 +12,7 @@ const { Server } = require("socket.io");
 const apiRouter = require("./routes/api");
 const authRouter = require("./routes/auth");
 const priorityRouter = require("./routes/priority");
+const ticketRouter = require("./routes/ticket");
 
 require("dotenv").config();
 
@@ -52,6 +53,7 @@ app.use(upload.any());
 app.use(apiRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/priority", priorityRouter);
+app.use("/api/ticket", ticketRouter);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;

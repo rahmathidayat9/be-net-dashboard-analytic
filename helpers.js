@@ -55,19 +55,15 @@ const generateToken = (id) => {
 
 // generate refresh token
 const generateRefreshToken = async (id) => {
-  await database.query(
+  const token = await database.query(
     `
         INSERT INTO refresh_tokens (user_id, token, expire_at, created_at) VALUES(
             '${id}',
             '${randomTokenString()}',
             '${await getFormatedTime("week")}',
             '${await getFormatedTime("datetime")}'
-        )
+        ) RETURNING token
     `
-  );
-
-  var token = await database.query(
-    `SELECT * FROM refresh_tokens WHERE user_id = '${id}' AND revoked IS NULL`
   );
 
   return token[0][0].token;

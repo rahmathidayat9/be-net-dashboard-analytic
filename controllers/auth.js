@@ -45,7 +45,7 @@ module.exports = {
       `);
 
       await database.query(
-        `UPDATE refresh_tokens SET revoked = now() WHERE user_id = '${user.id}'`
+        `UPDATE refresh_tokens SET revoked = now(), updated_at = now() WHERE user_id = '${user.id}'`
       );
 
       const token = helper.generateToken(user.id);

@@ -36,4 +36,34 @@ module.exports = {
       return helper.response(res, 400, "Header Authentication Is Missing");
     }
   },
+
+  // NOTE middleware bottom
+  bottomRole: async (req, res, next) => {
+    try {
+      if (req.user.role == "teknisi" || req.user.role == "satker") {
+        next();
+      }
+    } catch (err) {
+      return helper.response(
+        res,
+        403,
+        "Anda tidak diperkenankan menggunakan fitur ini"
+      );
+    }
+  },
+
+  // NOTE middleware upper
+  upperRole: async (req, res, next) => {
+    try {
+      if (req.user.role == "super admin" || req.user.role == "admin") {
+        next();
+      }
+    } catch (err) {
+      return helper.response(
+        res,
+        403,
+        "Anda tidak diperkenankan menggunakan fitur ini"
+      );
+    }
+  },
 };

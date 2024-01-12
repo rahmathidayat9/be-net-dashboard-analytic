@@ -7,7 +7,7 @@ const migrate = async () => {
   try {
     console.log("Migrating database...");
 
-    await database.query("DROP TABLE IF EXISTS ticket_log");
+    await database.query("DROP TABLE IF EXISTS ticket_logs");
     await database.query("DROP TABLE IF EXISTS tickets");
     await database.query("DROP TABLE IF EXISTS priorities");
     await database.query("DROP TABLE IF EXISTS auth_logs");
@@ -23,7 +23,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE refresh_tokens (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), token varchar(255) NOT NULL, expire_at timestamp(0) NULL DEFAULT NULL, revoked timestamp(0) NULL DEFAULT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE refresh_tokens (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), token varchar(255) NOT NULL, expire_at timestamp(0) NULL DEFAULT NULL, revoked timestamp(0) NULL DEFAULT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -31,11 +31,11 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE tickets (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), priority_id int NOT NULL REFERENCES priorities(id), detail text NOT NULL, status varchar(255) NOT NULL DEFAULT 'pending', created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE tickets (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), priority_id int NULL DEFAULT NULL REFERENCES priorities(id), detail text NOT NULL, status varchar(255) NOT NULL DEFAULT 'pending', created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
-      "CREATE TABLE ticket_log (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), ticket_id int NOT NULL REFERENCES tickets(id), note text NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE ticket_logs (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), ticket_id int NOT NULL REFERENCES tickets(id), note text NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
