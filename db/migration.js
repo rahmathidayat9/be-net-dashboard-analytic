@@ -1,6 +1,6 @@
 const { faker } = require("@faker-js/faker/locale/id_ID");
 
-const database = require("../config/database.js");
+const database = require("../config/database");
 const helpers = require("../helpers");
 
 const migrate = async () => {
@@ -10,6 +10,8 @@ const migrate = async () => {
     await database.query("DROP TABLE IF EXISTS ticket_log");
     await database.query("DROP TABLE IF EXISTS tickets");
     await database.query("DROP TABLE IF EXISTS priorities");
+    await database.query("DROP TABLE IF EXISTS auth_logs");
+    await database.query("DROP TABLE IF EXISTS refresh_tokens");
     await database.query("DROP TABLE IF EXISTS users");
 
     await database.query(
@@ -18,6 +20,14 @@ const migrate = async () => {
 
     await database.query(
       "CREATE TABLE priorities (id int NOT NULL GENERATED ALWAYS AS IDENTITY, name varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id), CONSTRAINT name UNIQUE (name))"
+    );
+
+    await database.query(
+      "CREATE TABLE refresh_tokens (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), token varchar(255) NOT NULL, expire_at timestamp(0) NULL DEFAULT NULL, revoked timestamp(0) NULL DEFAULT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+    );
+
+    await database.query(
+      "CREATE TABLE auth_logs (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -85,6 +95,42 @@ const migrate = async () => {
             `
       );
     }
+
+    await database.query(
+      `
+        INSERT INTO priorities(name, created_at) VALUES(
+            'Level 1',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
+    await database.query(
+      `
+        INSERT INTO priorities(name, created_at) VALUES(
+            'Level 2',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
+    await database.query(
+      `
+        INSERT INTO priorities(name, created_at) VALUES(
+            'Level 3',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
+    await database.query(
+      `
+        INSERT INTO priorities(name, created_at) VALUES(
+            'Level 4',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
 
     console.log("Migration completed");
 

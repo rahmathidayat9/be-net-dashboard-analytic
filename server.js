@@ -1,14 +1,18 @@
-const express = require('express');
-const http = require('http');
-const morgan = require('morgan');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const cors = require('cors');
-const apiRouter = require('./routes/api');
-const { Server } = require('socket.io');
-const cron = require('node-cron');
-require('dotenv').config();
+const cors = require("cors");
+const cron = require("node-cron");
+const express = require("express");
+const fs = require("fs");
+const http = require("http");
+const morgan = require("morgan");
+const path = require("path");
+const multer = require("multer");
+
+const { Server } = require("socket.io");
+
+const authRouter = require("./routes/auth");
+const apiRouter = require("./routes/api");
+
+require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
 
@@ -16,12 +20,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: "*",
   },
 });
 
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'storage/access.log'), { flags: 'a' });
-app.use(morgan('combined', { stream: accessLogStream }));
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "storage/access.log"),
+  { flags: "a" }
+);
+
+const pathLocation = "storage";
+
+if (!fs.existsSync(pathLocation)) {
+  fs.mkdirSync(pathLocation, { recursive: true });
+
+  fs.writeFile("storage/access.log", "", () => {});
+}
+
+app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors({ origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -33,41 +49,42 @@ const upload = multer({ storage: storage });
 app.use(upload.any());
 
 app.use(apiRouter);
+app.use("/api/auth", authRouter);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-io.on('connection', async (socket) => {
-  cron.schedule('* * * * * *', () => {
-    socket.emit('ether1', {
+io.on("connection", async (socket) => {
+  cron.schedule("* * * * * *", () => {
+    socket.emit("ether1", {
       download: getRandomNumber(10000, 20000),
       upload: getRandomNumber(10000, 20000),
     });
 
-    socket.emit('ether2', {
+    socket.emit("ether2", {
       download: 100000,
       upload: 200000,
     });
 
-    socket.emit('ether3', {
+    socket.emit("ether3", {
       download: 300000,
       upload: 400000,
     });
 
-    socket.emit('ether4', {
+    socket.emit("ether4", {
       download: 500000,
       upload: 600000,
     });
 
-    socket.emit('ether5', {
+    socket.emit("ether5", {
       download: 700000,
       upload: 800000,
     });
   });
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
   });
 });
 
