@@ -901,7 +901,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"note\":\"tes\",\r\n    \"priority_id\":4,\r\n    \"status\":\"hold\"\r\n}",
+							"raw": "{\r\n    \"note\":\"tes\",\r\n    \"priority_id\":4,\r\n    \"due_date\":\"2024-02-01\",\r\n    \"status\":\"hold\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -969,6 +969,58 @@
 							],
 							"path": [
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "count",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}ticket/count/pending?",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"count",
+								"pending"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"description": "pending, processed, deleted, closed, all"
+								}
 							]
 						}
 					},

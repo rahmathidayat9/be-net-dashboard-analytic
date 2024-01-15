@@ -31,7 +31,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE tickets (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), priority_id int NULL DEFAULT NULL REFERENCES priorities(id), detail text NOT NULL, status varchar(255) NOT NULL DEFAULT 'pending', created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE tickets (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), priority_id int NULL DEFAULT NULL REFERENCES priorities(id), detail text NOT NULL, status varchar(255) NOT NULL DEFAULT 'pending', number varchar(255) NOT NULL, due_date date NULL DEFAULT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(

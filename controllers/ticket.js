@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 const database = require("../config/database");
 const helper = require("../helpers");
 
@@ -65,6 +67,36 @@ module.exports = {
     }
   },
 
+  // NOTE hitung tiket
+  count: async (req, res) => {
+    // status = pending, processed, deleted, closed, all
+    try {
+      const status = req.params.status;
+
+      let ticket = await database.query(`
+        SELECT * FROM tickets WHERE status = '${status}'
+      `);
+
+      if (status == "all") {
+        ticket = await database.query(`
+          SELECT * FROM tickets WHERE status <> 'deleted'
+        `);
+      } else if (status == "deleted") {
+        ticket = await database.query(`
+          SELECT * FROM tickets WHERE status = 'deleted'
+        `);
+      }
+
+      const data = {
+        ticket: ticket[0].length,
+      };
+
+      return helper.response(res, 200, "Data ditemukan", data);
+    } catch (err) {
+      return helper.response(res, 400, "Error : " + err, err);
+    }
+  },
+
   // NOTE hapus tiket
   destroy: async (req, res) => {
     try {
@@ -93,7 +125,7 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      let { note, priority_id, status } = req.body;
+      let { note, priority_id, status, due_date } = req.body;
 
       if (!note) {
         return helper.response(res, 400, "Mohon isi note");
@@ -129,8 +161,18 @@ module.exports = {
               : ticket[0][0].status;
         }
 
+        if (!due_date || due_date == "" || due_date.length == 0) {
+          if (!ticket[0][0].due_date) {
+            return helper.response(res, 400, "Mohon isi due_date");
+          } else {
+            due_date = ticket[0][0].due_date;
+          }
+        } else {
+          due_date = moment(due_date).format("YYYY-MM-DD");
+        }
+
         await database.query(
-          `UPDATE tickets SET priority_id = ${priority_id}, status = '${status}', updated_at = now() WHERE id = ${id}`
+          `UPDATE tickets SET priority_id = ${priority_id}, status = '${status}', due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
         );
       }
 
@@ -258,12 +300,47 @@ module.exports = {
           return helper.response(res, 400, "Mohon isi note");
       }
 
+      let tickets = await database.query(
+        `
+          SELECT * FROM tickets
+        `
+      );
+
+      if (!user_id) {
+        user_id = req.user.id;
+      }
+
+      if (!priority_id) priority_id = 4;
+
+      tickets = tickets[0].length;
+
+      tickets = tickets + 1;
+
+      let number;
+
+      if (tickets < 10) {
+        number = `000000${tickets}`;
+      } else if (tickets > 9 && tickets < 100) {
+        number = `00000${tickets}`;
+      } else if (tickets > 99 && tickets < 1000) {
+        number = `0000${tickets}`;
+      } else if (tickets > 999 && tickets < 10000) {
+        number = `000${tickets}`;
+      } else if (tickets > 9999 && tickets < 100000) {
+        number = `00${tickets}`;
+      } else if (tickets > 99999 && tickets < 1000000) {
+        number = `0${tickets}`;
+      } else {
+        number = `0${tickets}`;
+      }
+
       const data = await database.query(
         `
-          INSERT INTO tickets(user_id, priority_id ,detail, created_at) VALUES(
+          INSERT INTO tickets(user_id, priority_id ,detail, number, created_at) VALUES(
               '${user_id}',
               '${priority_id}',
               '${detail}',
+              '${number}',
               '${await helper.getFormatedTime("datetime")}'
           ) RETURNING *
         `
