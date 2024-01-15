@@ -2,7 +2,7 @@ const express = require('express')
 const helpers = require('../helpers')
 const axios = require('axios')
 const bcrypt = require('bcrypt')
-const database = require('../config/database')
+// const database = require('../config/database')
 const router = express.Router()
 
 router.get('/', (req, res) => {
@@ -40,18 +40,25 @@ router.get('/api/dashboard/get-router', async (req, res) => {
     }
 })
 
-router.get('/api/dashboard/add-router', async (req, res) => {
+router.post('/api/dashboard/add-router', async (req, res) => {
     try {
+        let uuid = req.body.uuid
+        let name = req.body.name
+        let ipaddress = req.body.ipaddress
+        let user = req.body.user
+        let pass = req.body.pass
+        let portt = parseInt(req.body.portt)
+
         const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
         const url = '/router/add'
         const params = {
-            "uuid" : "mrtk-000001",
-            "code" : "MKS01",
-            "name" : "MKS01",
-            "ipaddress" : "103.186.32.129",
-            "user" : "test_api",
-            "pass" : "apianalytic",
-            "port" : 8728,
+            "uuid" : uuid,
+            "code" : name,
+            "name" : name,
+            "ipaddress" : ipaddress,
+            "user" : user,
+            "pass" : pass,
+            "port" : portt,
             "status" : "Active"
         }
 
@@ -64,12 +71,12 @@ router.get('/api/dashboard/add-router', async (req, res) => {
     }
 })
 
-router.get('/api/dashboard/remove-router', async (req, res) => {
+router.post('/api/dashboard/remove-router/:uuid', async (req, res) => {
     try {
         const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
         const url = '/router/remove'
         const params = {
-            "uuid" : "2"
+            "uuid" : req.params.uuid
         }
 
         const response = await axios.post(apiUrl+url, params)
@@ -81,18 +88,25 @@ router.get('/api/dashboard/remove-router', async (req, res) => {
     }
 })
 
-router.get('/api/dashboard/update-router', async (req, res) => {
+router.post('/api/dashboard/update-router', async (req, res) => {
     try {
+        let uuid = req.body.uuid
+        let name = req.body.name
+        let ipaddress = req.body.ipaddress
+        let user = req.body.user
+        let pass = req.body.pass
+        let portt = parseInt(req.body.portt)
+        
         const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
         const url = '/router/update'
         const params = {
-            "uuid" : "mrtk-000002",
-            "code" : "MKS02",
-            "name" : "MKS02",
-            "ipaddress" : "103.186.32.199",
-            "user" : "test_api",
-            "pass" : "apianalytic",
-            "port" : 8728,
+            "uuid" : uuid,
+            "code" : name,
+            "name" : name,
+            "ipaddress" : ipaddress,
+            "user" : user,
+            "pass" : pass,
+            "port" : portt,
             "status" : "Active"
         }
 
@@ -135,7 +149,7 @@ router.get('/api/dashboard/get-system', async (req, res) => {
 router.get('/api/dashboard/get-hotspot-active', async (req, res) => {
     try {
         const data = await helpers.sendPostData('/router/device/hotspot/active/print', {
-            "uuid" : "mrtk-000001"
+            "uuid" : req.query.uuid
         })
         
         return res.status(200).json(data)
@@ -161,7 +175,7 @@ router.get('/api/dashboard/get-dhcp-server', async (req, res) => {
 router.get('/api/dashboard/get-kid-control', async (req, res) => {
     try {
         const data = await helpers.sendPostData('/router/ip/kid-controll/print', {
-            "uuid" : "mrtk-000002"
+            "uuid" : req.query.uuid
         })
         
         return res.status(200).json(data)
@@ -176,7 +190,7 @@ router.get('/api/dashboard/get-interface', async (req, res) => {
         const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
         const url = '/router/interface/list/print'
         const params = {
-            "uuid" : "mrtk-000002"
+            "uuid" : req.query.uuid
         }
 
         const response = await axios.post(apiUrl+url, params)
@@ -188,7 +202,10 @@ router.get('/api/dashboard/get-interface', async (req, res) => {
             arrData.push(value.name)
         })
         
-        return res.status(200).json(arrData)
+        return res.status(200).json({
+            total: arrData.length,
+            data: arrData
+        })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: 'An error occurred' })
@@ -198,19 +215,72 @@ router.get('/api/dashboard/get-interface', async (req, res) => {
 router.get('/api/dashboard/interface-monitor-live', async (req, res) => {
     try {
         const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
+        
+        /* Get all interface dynamicaly of the uuid device before live monitoring */
+        const interfaceUrl = '/router/interface/list/print'
+        const interfaceParams = {
+            "uuid" : req.query.uuid
+        }
+
+        const interfaceResponse = await axios.post(apiUrl+interfaceUrl, interfaceParams)
+        const interfaceResponseData = interfaceResponse.data.massage
+
+        let arrData = []
+
+        interfaceResponseData.forEach((value, index) => {
+            arrData.push(value.name)
+        })
+        /**/
+
         const url = '/router/interface/list/monitor/live'
+
         const params = {
-            "uuid" : "mrtk-000002",
-            "ethernet" : [
-                "ether1",
-                "ether2",
-                "ether3",
-                "ether4",
-            ]
+            "uuid" : req.query.uuid,
+            "ethernet" : arrData
         }
 
         const response = await axios.post(apiUrl+url, params)
         
+        let data = response.data
+        data.total = arrData.length
+        data.interface = arrData
+
+        return res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: 'An error occurred' })
+    }
+})
+
+router.get('/api/dashboard/interface-monitor-stop', async (req, res) => {
+    try {
+        const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
+        
+        /* Get all interface dynamicaly of the uuid device before stop live monitoring */
+        const interfaceUrl = '/router/interface/list/print'
+        const interfaceParams = {
+            "uuid" : req.query.uuid
+        }
+
+        const interfaceResponse = await axios.post(apiUrl+interfaceUrl, interfaceParams)
+        const interfaceResponseData = interfaceResponse.data.massage
+
+        let arrData = []
+
+        interfaceResponseData.forEach((value, index) => {
+            arrData.push(value.name)
+        })
+        /**/
+
+        const url = '/router/interface/list/monitor/stop'
+
+        const params = {
+            "uuid" : req.query.uuid,
+            "ethernet" : arrData
+        }
+
+        const response = await axios.post(apiUrl+url, params)
+
         return res.status(200).json(response.data)
     } catch (error) {
         console.log(error)
@@ -344,36 +414,6 @@ router.get('/api/dashboard/logs-list', async (req, res) => {
     }
 })
 
-// router.get('/api/dashboard/logs', async (req, res) => {
-//     let data = await database.query(`SELECT
-//         AVG(CAST(rate_in AS numeric)) AS rate_in,
-//         AVG(CAST(rate_out AS numeric)) AS rate_out,
-//         created_at,
-//         date
-//     FROM
-//         analytics
-//     GROUP BY
-//         created_at,date`)
-
-//     return res.send(data.rows)    
-// })
-
-// router.get('/api/dashboard/top-traffic', async (req, res) => {
-//     let data = await database.query(`SELECT
-//     ethername as port,
-//         SUM(tx_byte::BIGINT) AS upload,
-//         SUM(rx_byte::BIGINT) AS download
-//     FROM
-//         interfaces
-//     WHERE
-//         EXTRACT(YEAR FROM TO_DATE(date, 'YYYY-MM-DD')) = EXTRACT(YEAR FROM CURRENT_DATE)
-//         AND EXTRACT(MONTH FROM TO_DATE(date, 'YYYY-MM-DD')) = EXTRACT(MONTH FROM CURRENT_DATE)
-//     GROUP BY
-//         ethername`)
-
-//     return res.send(data.rows)    
-// })
-
 router.get('/api/dashboard/logs-sites', async (req, res) => {
     try {
         const url = 'http://103.16.117.62/logs/page?page=1&limit=10'
@@ -391,7 +431,7 @@ router.get('/api/dashboard/logs-sites', async (req, res) => {
 /* User Management Module  */
 router.get('/api/dashboard/list-users', async (req, res) => {
     let query = `SELECT * FROM users`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     res.send({
         message: 'Data listed successfully',
@@ -408,7 +448,7 @@ router.post('/api/dashboard/create-users', async (req, res) => {
 
     let query = `INSERT INTO users (username, full_name, password, role_id) 
         VALUES ('${username}', '${full_name}', '${password}', '${role_id}')`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     res.send({
         message: 'Data saved successfully',
@@ -419,7 +459,7 @@ router.post('/api/dashboard/create-users', async (req, res) => {
 router.get('/api/dashboard/edit-users/:id', async (req, res) => {
     let id = req.params.id
     let query = `SELECT * FROM users WHERE id='${id}'`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     res.send({
         message: 'Data edit successfully',
@@ -431,7 +471,7 @@ router.get('/api/dashboard/edit-users/:id', async (req, res) => {
 router.post('/api/dashboard/update-users/:id', async (req, res) => {
     let id = req.params.id
     let query_find_user = `SELECT * FROM users WHERE id='${id}'`
-    let data_find_user = await database.query(query_find_user)
+    // let data_find_user = await database.query(query_find_user)
 
     let username = req.body.username
     let full_name = req.body.full_name
@@ -445,7 +485,7 @@ router.post('/api/dashboard/update-users/:id', async (req, res) => {
 
     let query = `UPDATE users SET username='${username}', full_name='${full_name}', password='${password}'
         WHERE id=${id}`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     res.send({
         message: 'Data update successfully',
@@ -457,7 +497,7 @@ router.post('/api/dashboard/update-users/:id', async (req, res) => {
 router.post('/api/dashboard/delete-users/:id', async (req, res) => {
     let id = req.params.id
     let query = `DELETE FROM users WHERE id=${id}`
-    let data = await database.query(query)
+    // let data = await database.query(query)
     
     res.send({
         message: 'Data deleted successfully',
@@ -469,7 +509,7 @@ router.post('/api/dashboard/delete-users/:id', async (req, res) => {
 /* Helpdesk Module  */
 router.get('/api/dashboard/list-helpdesk', async (req, res) => {
     let query = `SELECT * FROM helpdesk JOIN users ON helpdesk.user_id=users.id`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     let query_count = `SELECT
         COUNT(*) AS total,
@@ -479,7 +519,7 @@ router.get('/api/dashboard/list-helpdesk', async (req, res) => {
     FROM
         helpdesk`
 
-    let data_count = await database.query(query_count)
+    // let data_count = await database.query(query_count)
 
     res.send({
         message: 'Data listed successfully',
@@ -512,7 +552,7 @@ router.post('/api/dashboard/create-helpdesk', async (req, res) => {
 
     let query = `INSERT INTO helpdesk (user_id, description, status, due_date, code, subject) 
         VALUES (${user_id}, '${description}', '3', '${due_date}', '${ticket_number}', '${subject}')`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     res.send({
         message: 'Data saved successfully',
@@ -529,7 +569,7 @@ router.post('/api/dashboard/update-helpdesk/:id', async (req, res) => {
 
     let query = `UPDATE helpdesk SET description='${description}', status='${status}', notes='${notes}'
         WHERE ticket_number=${id}`
-    let data = await database.query(query)
+    // let data = await database.query(query)
 
     res.send({
         message: 'Data update successfully',
@@ -541,7 +581,7 @@ router.post('/api/dashboard/update-helpdesk/:id', async (req, res) => {
 router.post('/api/dashboard/delete-helpdesk', async (req, res) => {
     let code = req.body.code
     let query = `DELETE FROM helpdesk WHERE code='${code}'`
-    let data = await database.query(query)
+    // let data = await database.query(query)
     
     res.send({
         message: 'Data deleted successfully',

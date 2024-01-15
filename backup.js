@@ -72,6 +72,8 @@ app.get('/api/dashboard/get-interfaces', async (req, res) => {
       arrData.push(value.name)
     })
 
+    liveMonitoring(req.query.uuid, arrData)
+
     // Save data to local storage
     localStorage.setItem('dataInterface', JSON.stringify(arrData));
 
@@ -82,83 +84,98 @@ app.get('/api/dashboard/get-interfaces', async (req, res) => {
   }
 })
 
-const clientSocket = ioClient('https://api-mikrotik.linkdemo.web.id');
-let isProcessing = false;
+async function liveMonitoring(uuid, storedData) {
+  try {
+    const apiUrl = 'https://api-mikrotik.linkdemo.web.id/api'
+    // const storedData = JSON.parse(localStorage.getItem('dataInterface'));
+    
+    /* Get all interface dynamicaly of the uuid device before live monitoring */
+    const interfaceUrl = '/router/interface/list/monitor/live'
+    const interfaceParams = {
+      "uuid" : uuid,
+      "ethernet": storedData
+    }
 
-clientSocket.on('ether1', (data) => {
-  if (isProcessing) {
-    // If a request is already being processed, ignore this one
-    return;
+    const interfaceResponse = await axios.post(apiUrl+interfaceUrl, interfaceParams)
+    const interfaceResponseData = interfaceResponse.data.massage
+    // console.log(storedData);
+  } catch (error) {
+    console.log(error)
+    // return res.status(500).json({ error: 'An error occurred' })
   }
+}
 
-  isProcessing = true;
+// clientSocket.on('ether1', (data) => {
+//   if (isProcessing) {
+//     // If a request is already being processed, ignore this one
+//     return;
+//   }
 
-  data.data.forEach((value, index) => {
-    let obj = value;
-    const uploadData = formatBytes(obj['tx-bits-per-second']);
-    const downloadData = formatBytes(obj['rx-bits-per-second']);
-    console.log(uploadData);
-    console.log(downloadData);
-  });
+//   isProcessing = true;
 
-  isProcessing = false;
-});
+//   data.data.forEach((value, index) => {
+//     let obj = value;
+//     const uploadData = formatBytes(obj['tx-bits-per-second']);
+//     const downloadData = formatBytes(obj['rx-bits-per-second']);
+//     console.log(uploadData);
+//     console.log(downloadData);
+//   });
 
-cron.schedule('* * * * * *', () => {  
-  // Avoid triggering the cron job if a request is still processing
-  if (!isProcessing) {
-    // Your existing code here
-  }
-});
+//   isProcessing = false;
+// });
+
+// cron.schedule('* * * * * *', () => {  
+//   // Avoid triggering the cron job if a request is still processing
+//   if (!isProcessing) {
+//     // Your existing code here
+//   }
+// });
 
 
 async function triggerSocket(socket) {
   const storedData = JSON.parse(localStorage.getItem('dataInterface'));
-  console.log(storedData);
+
   storedData.forEach((value, index) => {
-    socket.emit(value, {
-      download: getRandomNumber(10000, 45000),
-      upload: getRandomNumber(10000, 45000),
+    const clientSocket = ioClient('https://api-mikrotik.linkdemo.web.id');
+    let isProcessing = false;
+    
+    clientSocket.on(value, (data) => {
+      if (isProcessing) {
+        // If a request is already being processed, ignore this one
+        return;
+      }
+    
+      isProcessing = true;
+      
+      // console.log(data);
+      data.data.forEach((val, idx) => {
+        let obj = val;
+        const uploadData = obj['tx-bits-per-second'];
+        const downloadData = obj['rx-bits-per-second'];
+        
+        console.log(value+' : '+uploadData+' - '+downloadData);
+
+        cron.schedule('*/5 * * * * *', () => {
+          socket.emit(value, {
+            download: downloadData,
+            upload: uploadData,
+          });
+        });
+      });
+    
+      isProcessing = false;
     });
-  }) 
+  })
 }
-
-app.post("/api/dashboard/send-telegram", async (req, res) => {
-  const groupIds = ["-4010824640", "-4084355967"];
-  let interface = req.body.interface
-  let speed = req.body.speed
-
-  const options = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    timeZoneName: 'short',
-  };
-
-  const locale = 'id-ID';
-
-  const formattedDate = new Date().toLocaleString(locale, options);
-
-  groupIds.forEach((groupId) => {
-    telegram.sendMessage(groupId, 'Interface '+interface+' Mengalami down , '+formattedDate).then(() => {
-      console.log(`Message sent to group ${groupId}`);
-    }).catch((error) => {
-      console.error(`Error sending message to group ${groupId}:`, error);
-    });
-  });
-})
 
 io.on('connection', async (socket) => {
   let interfaceLive;
 
   app.get('/api/dashboard/start', async (req, res) => {
     if (!interfaceLive) {
-      interfaceLive = cron.schedule('* * * * * *', () => {
-        triggerSocket(io.sockets);
-      });
+      // interfaceLive = cron.schedule('* * * * * *', () => {
+      triggerSocket(io.sockets);
+      // });
 
       res.send('start');
     } else {
