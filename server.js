@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const cors = require('cors');
-const apiRouter = require('./routes/api');
 const { Server } = require('socket.io');
 const ioClient = require('socket.io-client');
 const cron = require('node-cron');
@@ -14,6 +13,10 @@ const { Telegraf } = require('telegraf');
 const Telegram = require('telegraf/telegram');
 const LocalStorage = require('node-localstorage').LocalStorage;
 const localStorage = new LocalStorage('./scratch');
+const apiRouter = require("./routes/api");
+const authRouter = require("./routes/auth");
+const priorityRouter = require("./routes/priority");
+const ticketRouter = require("./routes/ticket");
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
@@ -22,7 +25,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: "*",
   },
 });
 
@@ -43,6 +46,9 @@ const upload = multer({ storage: storage });
 // Middleware for handling form-data
 app.use(upload.any());
 app.use(apiRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/priority", priorityRouter);
+app.use("/api/ticket", ticketRouter);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -123,33 +129,33 @@ async function triggerSocket(socket) {
   }) 
 }
 
-app.post("/api/dashboard/send-telegram", async (req, res) => {
-  const groupIds = ["-4010824640", "-4084355967"];
-  let interface = req.body.interface
-  let speed = req.body.speed
+// app.post("/api/dashboard/send-telegram", async (req, res) => {
+//   const groupIds = ["-4010824640", "-4084355967"];
+//   let interface = req.body.interface
+//   let speed = req.body.speed
 
-  const options = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    timeZoneName: 'short',
-  };
+//   const options = {
+//     weekday: 'long',
+//     year: 'numeric',
+//     month: 'long',
+//     day: 'numeric',
+//     hour: 'numeric',
+//     minute: 'numeric',
+//     timeZoneName: 'short',
+//   };
 
-  const locale = 'id-ID';
+//   const locale = 'id-ID';
 
-  const formattedDate = new Date().toLocaleString(locale, options);
+//   const formattedDate = new Date().toLocaleString(locale, options);
 
-  groupIds.forEach((groupId) => {
-    telegram.sendMessage(groupId, 'Interface '+interface+' Mengalami down , '+formattedDate).then(() => {
-      console.log(`Message sent to group ${groupId}`);
-    }).catch((error) => {
-      console.error(`Error sending message to group ${groupId}:`, error);
-    });
-  });
-})
+//   groupIds.forEach((groupId) => {
+//     telegram.sendMessage(groupId, 'Interface '+interface+' Mengalami down , '+formattedDate).then(() => {
+//       console.log(`Message sent to group ${groupId}`);
+//     }).catch((error) => {
+//       console.error(`Error sending message to group ${groupId}:`, error);
+//     });
+//   });
+// })
 
 io.on('connection', async (socket) => {
   let interfaceLive;
@@ -176,8 +182,8 @@ io.on('connection', async (socket) => {
     }
   })
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
   });
 });
 

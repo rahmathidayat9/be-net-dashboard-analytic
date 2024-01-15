@@ -550,9 +550,8 @@ router.post('/api/dashboard/create-helpdesk', async (req, res) => {
     let due_date = req.body.due_date
     let ticket_number = req.body.ticket_number
 
-    let query = `INSERT INTO helpdesk (user_id, description, status, due_date, code, subject) 
-        VALUES (${user_id}, '${description}', '3', '${due_date}', '${ticket_number}', '${subject}')`
-    // let data = await database.query(query)
+    let query = `INSERT INTO helpdesk (code, user_id, description, status, due_date, subject, priority_level) 
+        VALUES ('${ticket_number}', '${user_id}', '${description}', '3', '${due_date}', '${subject}', '4')`
 
     res.send({
         message: 'Data saved successfully',

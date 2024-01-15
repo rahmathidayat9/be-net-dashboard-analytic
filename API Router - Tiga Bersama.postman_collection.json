@@ -1,0 +1,986 @@
+{
+	"info": {
+		"_postman_id": "67403e3e-3b8a-43c2-8cae-1b7a1c58ad29",
+		"name": "API Router - Tiga Bersama",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11108847",
+		"_collection_link": "https://orange-shuttle-39637.postman.co/workspace/My-Workspace~19abc2a1-782c-4d73-8aa2-d8ce678a2725/collection/11108847-67403e3e-3b8a-43c2-8cae-1b7a1c58ad29?action=share&source=collection_link&creator=11108847"
+	},
+	"item": [
+		{
+			"name": "device",
+			"item": [
+				{
+					"name": "status device",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    // device \n    \"host\" : \"103.186.32.129\",\n    \"user\" : \"test_api\",\n    \"password\" : \"apianalytic\",\n    \"port\" : \"8728\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/api/router/device/status",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"api",
+								"router",
+								"device",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Router",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uuid\" : \"mrtk-000001\",\n    \"code\" : \"MKS01\",\n    \"name\" : \"MKS01\",\n    \"ipaddress\" : \"103.186.32.129\",\n    \"user\" : \"test_api\",\n    \"pass\" : \"apianalytic\",\n    \"port\" : 8728,\n    \"status\" : \"Active\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/api/router/add",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"api",
+								"router",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Router",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uuid\" : \"2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/api/router/remove",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"api",
+								"router",
+								"remove"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Router",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uuid\" : \"mrtk-000002\",\n    \"code\" : \"MKS02\",\n    \"name\" : \"MKS02\",\n    \"ipaddress\" : \"103.186.32.199\",\n    \"user\" : \"test_api\",\n    \"pass\" : \"apianalytic\",\n    \"port\" : 8728,\n    \"status\" : \"Active\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_local}}/api/router/update",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"api",
+								"router",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Router",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url_local}}/api/router/list",
+							"host": [
+								"{{url_local}}"
+							],
+							"path": [
+								"api",
+								"router",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "command",
+			"item": [
+				{
+					"name": "ip",
+					"item": [
+						{
+							"name": "hotspot",
+							"item": [
+								{
+									"name": "active",
+									"item": [
+										{
+											"name": "print",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{url_local}}/api/router/device/hotspot/active/print",
+													"host": [
+														"{{url_local}}"
+													],
+													"path": [
+														"api",
+														"router",
+														"device",
+														"hotspot",
+														"active",
+														"print"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "New Request",
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": ""
+												}
+											},
+											"response": []
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "dhcp-server",
+							"item": [
+								{
+									"name": "print",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000002\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/ip/dhcp-server/print",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"ip",
+												"dhcp-server",
+												"print"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "kid-controll",
+							"item": [
+								{
+									"name": "device",
+									"item": [
+										{
+											"name": "print",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{url_local}}/api/router/ip/kid-controll/print",
+													"host": [
+														"{{url_local}}"
+													],
+													"path": [
+														"api",
+														"router",
+														"ip",
+														"kid-controll",
+														"print"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "interface",
+					"item": [
+						{
+							"name": "list",
+							"item": [
+								{
+									"name": "print",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000002\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/interface/list/print",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"interface",
+												"list",
+												"print"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "monitor",
+							"item": [
+								{
+									"name": "monitor live",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000002\",\n    \"ethernet\" : [\n        \"ether1\",\n        \"ether2\"\n\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/interface/list/monitor/live",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"interface",
+												"list",
+												"monitor",
+												"live"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "monitor log add",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\",\n     \"ethernet\" : [\n         \"ether1\",\n         \"ether2\",\n         \"ether3\",\n         \"ether4\"\n     ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/interface/list/monitor/log/add",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"interface",
+												"list",
+												"monitor",
+												"log",
+												"add"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "monitor log list",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\",\n     \"ethernet\" : [\n         \"ether1\",\n         \"ether2\",\n         \"ether3\",\n         \"ether4\"\n     ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/interface/list/monitor/log/list",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"interface",
+												"list",
+												"monitor",
+												"log",
+												"list"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "monitor log delete",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\",\n     \"ethernet\" : [\n         \"ether1\",\n         \"ether2\",\n         \"ether3\",\n         \"ether4\"\n     ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/interface/list/monitor/log/delete",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"interface",
+												"list",
+												"monitor",
+												"log",
+												"delete"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "monitor stop",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\",\n     \"ethernet\" : [\n         \"ether1\"\n     ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/interface/list/monitor/stop",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"interface",
+												"list",
+												"monitor",
+												"stop"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "system",
+					"item": [
+						{
+							"name": "resources",
+							"item": [
+								{
+									"name": "print",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000001\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url_local}}/api/router/system/resources/print",
+											"host": [
+												"{{url_local}}"
+											],
+											"path": [
+												"api",
+												"router",
+												"system",
+												"resources",
+												"print"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Logs",
+					"item": [
+						{
+							"name": "print",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000001\",\n     \"date\" : \"2023-11-15\",\n     \"time\" : \"8\", // nama file json atau jam capture\n     \"ethernet\" : \"ether1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_local}}/api/router/logs/print",
+									"host": [
+										"{{url_local}}"
+									],
+									"path": [
+										"api",
+										"router",
+										"logs",
+										"print"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "list",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url_local}}/api/router/logs/list",
+									"host": [
+										"{{url_local}}"
+									],
+									"path": [
+										"api",
+										"router",
+										"logs",
+										"list"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"if(jsonData.statuscode == 200) {\r",
+									"postman.setEnvironmentVariable(\"authToken\", jsonData.data.token);\r",
+									"postman.setEnvironmentVariable(\"refreshToken\", jsonData.data.refreshToken);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"superadmin\",\r\n    \"password\":\"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/login",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"\r",
+									"if(jsonData.statuscode == 200) {\r",
+									"postman.setEnvironmentVariable(\"authToken\", jsonData.data.token);\r",
+									"postman.setEnvironmentVariable(\"refreshToken\", jsonData.data.refreshToken);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\":\"ky9fGGIJygAvnEtsmwiZFv3EcGx6E62etoMXt7po\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/refresh",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "misc",
+			"item": [
+				{
+					"name": "list prioritas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}priority",
+							"host": [
+								"{{url}}priority"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ticket",
+			"item": [
+				{
+					"name": "list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}ticket",
+							"host": [
+								"{{url}}ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"detail\":\"tes\",\r\n    \"note\":\"tes\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}ticket",
+							"host": [
+								"{{url}}ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}ticket/1",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reply",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"note\":\"tes\",\r\n    \"priority_id\":4,\r\n    \"status\":\"hold\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}ticket/reply/1",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"reply",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"note\":\"tes\",\r\n    \"priority_id\":4,\r\n    \"status\":\"hold\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}ticket/1",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "url_local",
+			"value": "https://api-mikrotik.linkdemo.web.id"
+		}
+	]
+}
