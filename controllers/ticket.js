@@ -13,6 +13,10 @@ module.exports = {
             tickets.detail, 
             tickets.status, 
             tickets.created_at,
+            tickets.number,
+            tickets.due_date,
+            tickets.cause,
+            tickets.solution,
             users."name" AS "user", 
             priorities."name" AS priority
         FROM
@@ -38,6 +42,10 @@ module.exports = {
             tickets.detail, 
             tickets.status, 
             tickets.created_at,
+            tickets.number,
+            tickets.due_date,
+            tickets.cause,
+            tickets.solution,
             users."name" AS "user", 
             priorities."name" AS priority
           FROM
@@ -97,6 +105,45 @@ module.exports = {
     }
   },
 
+  // NOTE closed ticket
+  closed: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      let { cause, solution } = req.body;
+
+      switch (true) {
+        case !cause:
+          return helper.response(res, 400, "Mohon isi cause");
+          break;
+        case !solution:
+          return helper.response(res, 400, "Mohon isi solution");
+          break;
+      }
+
+      const note = `Isu terselesaikan. Penyebab: ${cause}, diselesaikan dengan: ${solution}`;
+
+      await database.query(
+        `UPDATE tickets SET status = 'closed', updated_at = now() WHERE id = ${id}`
+      );
+
+      await database.query(
+        `
+            INSERT INTO ticket_logs(user_id, ticket_id, note, created_at) VALUES(
+                '${req.user.id}',
+                '${id}',
+                '${note}',
+                '${await helper.getFormatedTime("datetime")}'
+            ) RETURNING *
+          `
+      );
+
+      return helper.response(res, 200, "Status berhasil diperbaharui");
+    } catch (err) {
+      return helper.response(res, 400, "Error : " + err, err);
+    }
+  },
+
   // NOTE hapus tiket
   destroy: async (req, res) => {
     try {
@@ -120,12 +167,46 @@ module.exports = {
     }
   },
 
+  // NOTE pending ticket
+  pending: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      let { reason } = req.body;
+
+      if (!reason) {
+        return helper.response(res, 400, "Mohon isi reason");
+      }
+
+      reason = `terpending dengan alasan: ${reason}`;
+
+      await database.query(
+        `UPDATE tickets SET status = 'pending', updated_at = now() WHERE id = ${id}`
+      );
+
+      await database.query(
+        `
+            INSERT INTO ticket_logs(user_id, ticket_id, note, created_at) VALUES(
+                '${req.user.id}',
+                '${id}',
+                '${reason}',
+                '${await helper.getFormatedTime("datetime")}'
+            ) RETURNING *
+          `
+      );
+
+      return helper.response(res, 200, "Status berhasil diperbaharui");
+    } catch (err) {
+      return helper.response(res, 400, "Error : " + err, err);
+    }
+  },
+
   // NOTE balas ticket
   reply: async (req, res) => {
     try {
       const id = req.params.id;
 
-      let { note, priority_id, status, due_date } = req.body;
+      let { note, priority_id, due_date } = req.body;
 
       if (!note) {
         return helper.response(res, 400, "Mohon isi note");
@@ -154,13 +235,6 @@ module.exports = {
           priority_id = ticket[0][0].priority_id;
         }
 
-        if (!status || status == "" || status.length == 0) {
-          status =
-            ticket[0][0].status == "pending"
-              ? "processed"
-              : ticket[0][0].status;
-        }
-
         if (!due_date || due_date == "" || due_date.length == 0) {
           if (!ticket[0][0].due_date) {
             return helper.response(res, 400, "Mohon isi due_date");
@@ -172,7 +246,7 @@ module.exports = {
         }
 
         await database.query(
-          `UPDATE tickets SET priority_id = ${priority_id}, status = '${status}', due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
+          `UPDATE tickets SET priority_id = ${priority_id}, due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
         );
       }
 
@@ -204,6 +278,10 @@ module.exports = {
             tickets.detail, 
             tickets.status, 
             tickets.created_at,
+            tickets.number,
+            tickets.due_date,
+            tickets.cause,
+            tickets.solution,
             users."name" AS "user", 
             priorities."name" AS priority
         FROM
@@ -231,6 +309,10 @@ module.exports = {
             tickets.detail, 
             tickets.status, 
             tickets.created_at,
+            tickets.number,
+            tickets.due_date,
+            tickets.cause,
+            tickets.solution,
             users."name" AS "user", 
             priorities."name" AS priority
           FROM
@@ -283,6 +365,27 @@ module.exports = {
       };
 
       return helper.response(res, 200, "Detail Tiket", data);
+    } catch (err) {
+      return helper.response(res, 400, "Error : " + err, err);
+    }
+  },
+
+  // NOTE closed ticket
+  status: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      let { status } = req.body;
+
+      if (!status) {
+        return helper.response(res, 400, "Mohon isi status");
+      }
+
+      await database.query(
+        `UPDATE tickets SET status = '${status}', updated_at = now() WHERE id = ${id}`
+      );
+
+      return helper.response(res, 200, "Status berhasil diperbaharui");
     } catch (err) {
       return helper.response(res, 400, "Error : " + err, err);
     }

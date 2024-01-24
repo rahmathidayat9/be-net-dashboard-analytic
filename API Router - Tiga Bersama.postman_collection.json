@@ -614,7 +614,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\":\"superadmin\",\r\n    \"password\":\"12345678\"\r\n}",
+							"raw": "{\r\n    \"username\":\"admin1\",\r\n    \"password\":\"12345678\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -901,7 +901,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"note\":\"tes\",\r\n    \"priority_id\":4,\r\n    \"due_date\":\"2024-02-01\",\r\n    \"status\":\"hold\"\r\n}",
+							"raw": "{\r\n    \"note\":\"tes\",\r\n    \"priority_id\":4,\r\n    \"due_date\":\"2024-02-01\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1021,6 +1021,286 @@
 									"value": null,
 									"description": "pending, processed, deleted, closed, all"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "pending",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"reason\":\"kemaleman\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}ticket/pending/1",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"pending",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "closed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cause\":\"panas\",\r\n    \"solution\":\"kompres\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}ticket/closed/1",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"closed",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\":\"process\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}ticket/status/1",
+							"host": [
+								"{{url}}ticket"
+							],
+							"path": [
+								"status",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "monitor",
+			"item": [
+				{
+					"name": "upload download",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cause\":\"panas\",\r\n    \"solution\":\"kompres\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}upload-download/mrtk-000001",
+							"host": [
+								"{{url}}upload-download"
+							],
+							"path": [
+								"mrtk-000001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload download hari ini",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cause\":\"panas\",\r\n    \"solution\":\"kompres\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}upload-download/today/mrtk-000001",
+							"host": [
+								"{{url}}upload-download"
+							],
+							"path": [
+								"today",
+								"mrtk-000001"
 							]
 						}
 					},
