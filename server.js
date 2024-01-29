@@ -122,7 +122,7 @@ clientSocket.on("ether1", (data) => {
 });
 
 // router 000005
-cron.schedule("*/5 * * * * *", async () => {
+cron.schedule("0 * * * *", async () => {
   try {
     const url =
       process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
@@ -188,7 +188,7 @@ cron.schedule("*/5 * * * * *", async () => {
 });
 
 // router 000006
-cron.schedule("*/5 * * * * *", async () => {
+cron.schedule("0 * * * *", async () => {
   try {
     const url =
       process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
