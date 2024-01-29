@@ -4,12 +4,14 @@ const moment = require("moment");
 const database = require("../config/database");
 const helper = require("../helpers");
 
+require("dotenv").config();
+
 module.exports = {
   // NOTE upload download
   uploadDownload: async (req, res) => {
     try {
       const url =
-        "https://api-mikrotik.linkdemo.web.id/api/router/interface/list/print";
+        process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
 
       const params = {
         uuid: req.params.uuid,

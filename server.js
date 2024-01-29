@@ -16,6 +16,7 @@ const LocalStorage = require("node-localstorage").LocalStorage;
 const localStorage = new LocalStorage("./scratch");
 const apiRouter = require("./routes/api");
 const authRouter = require("./routes/auth");
+const bandwithRouter = require("./routes/bandwith");
 const microticLogRouter = require("./routes/microticLog");
 const priorityRouter = require("./routes/priority");
 const ticketRouter = require("./routes/ticket");
@@ -57,6 +58,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/priority", priorityRouter);
 app.use("/api/ticket", ticketRouter);
 app.use("/api", microticLogRouter);
+app.use("/api/bandwith", bandwithRouter);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
