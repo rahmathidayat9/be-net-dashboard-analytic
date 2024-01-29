@@ -151,7 +151,6 @@ module.exports = {
 
       from_date = moment(from_date).format("YYYY-MM-DD");
       to_date = moment(to_date).format("YYYY-MM-DD");
-      console.log(from_date, to_date);
 
       let logs = await database.query(`
         SELECT * FROM microtic_logs WHERE created_at::date <= '${to_date}'::date
@@ -222,6 +221,11 @@ module.exports = {
         for (let h = 0; h < dates.length; h++) {
           let orders = [];
 
+          logs = await database.query(`
+            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}'::date
+             ORDER BY order_number asc
+          `);
+
           logs[0].forEach((l) => {
             if (orders.length == 0) {
               orders.push(l.order_number);
@@ -234,16 +238,16 @@ module.exports = {
           });
 
           const earlylogs = await database.query(`
-        SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}' AND order_number = ${orders[0]} AND router = '${router}'
-        `);
+            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}' AND order_number = ${orders[0]} AND router = '${router}'
+          `);
 
           const latestLog = await database.query(`
-        SELECT * FROM microtic_logs WHERE created_at::date = '${
-          dates[h]
-        }' AND order_number = ${
+            SELECT * FROM microtic_logs WHERE created_at::date = '${
+              dates[h]
+            }' AND order_number = ${
             orders[orders.length - 1]
           } AND router = '${router}'
-        `);
+          `);
 
           latestLog[0].forEach((log, i) => {
             data.push({
