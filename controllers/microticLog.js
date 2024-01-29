@@ -153,7 +153,7 @@ module.exports = {
 
       let logs = await database.query(`
         SELECT * FROM microtic_logs WHERE created_at::date <= '${to_date}'::date
-        AND created_at::date >= '${from_date}'::date AND router = '${router}' 
+        AND created_at::date >= '${from_date}'::date AND router = '${router}' ORDER BY order_number asc
       `);
 
       if (logs[0].length == 0) {
