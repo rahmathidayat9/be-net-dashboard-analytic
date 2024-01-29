@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.get("/upload-download/today/:uuid", controller.todayUploadDownloadRecap);
 router.get("/upload-download/:uuid", controller.uploadDownload);
+router.post("/upload-download/report", controller.uploadDownloadRecap);
 
 module.exports = router;

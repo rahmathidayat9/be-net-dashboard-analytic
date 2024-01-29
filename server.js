@@ -3,6 +3,7 @@ const http = require("http");
 const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
+const database = require("./config/database");
 const multer = require("multer");
 const cors = require("cors");
 const { Server } = require("socket.io");
@@ -18,6 +19,8 @@ const authRouter = require("./routes/auth");
 const microticLogRouter = require("./routes/microticLog");
 const priorityRouter = require("./routes/priority");
 const ticketRouter = require("./routes/ticket");
+const helper = require("./helpers");
+
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
@@ -66,7 +69,7 @@ function formatBytes(bytes) {
 
 app.get("/api/dashboard/get-interfaces", async (req, res) => {
   try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+    const apiUrl = process.env.MICROTIC_API_ENV + "api";
 
     /* Get all interface dynamicaly of the uuid device before live monitoring */
     const interfaceUrl = "/router/interface/list/print";
@@ -96,7 +99,7 @@ app.get("/api/dashboard/get-interfaces", async (req, res) => {
   }
 });
 
-const clientSocket = ioClient("https://api-mikrotik.linkdemo.web.id");
+const clientSocket = ioClient(process.env.MICROTIC_API_ENV);
 let isProcessing = false;
 
 clientSocket.on("ether1", (data) => {
@@ -118,10 +121,135 @@ clientSocket.on("ether1", (data) => {
   isProcessing = false;
 });
 
-cron.schedule("* * * * * *", () => {
-  // Avoid triggering the cron job if a request is still processing
-  if (!isProcessing) {
-    // Your existing code here
+// router 000005
+cron.schedule("*/5 * * * * *", async () => {
+  try {
+    const url =
+      process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
+
+    const params = {
+      uuid: "mrtk-000005",
+    };
+
+    const response = await axios.post(url, params);
+
+    if (response.data.success) {
+      const responseData = response.data.massage;
+
+      let arrData = [];
+
+      const log = await database.query(`
+        SELECT * FROM microtic_logs WHERE router = 'mrtk-000005' ORDER BY id DESC LIMIT 1
+      `);
+
+      if (log[0].length == 0) {
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+                INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
+                    'mrtk-000005',
+                    '${value.name}',
+                    '${value["tx-byte"]}',
+                    '${value["rx-byte"]}',
+                    1,
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      } else {
+        const order_number = log[0][0].order_number + 1;
+
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
+                    'mrtk-000005',
+                    '${value.name}',
+                    '${value["tx-byte"]}',
+                    '${value["rx-byte"]}',
+                    ${order_number},
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      }
+    }
+
+    console.log("mrtk-000005 updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// router 000006
+cron.schedule("*/5 * * * * *", async () => {
+  try {
+    const url =
+      process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
+
+    const params = {
+      uuid: "mrtk-000006",
+    };
+
+    const response = await axios.post(url, params);
+
+    if (response.data.success) {
+      const responseData = response.data.massage;
+
+      let arrData = [];
+
+      const log = await database.query(`
+        SELECT * FROM microtic_logs WHERE router = 'mrtk-000006' ORDER BY id DESC LIMIT 1
+      `);
+
+      if (log[0].length == 0) {
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+                INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
+                    'mrtk-000006',
+                    '${value.name}',
+                    '${value["tx-byte"]}',
+                    '${value["rx-byte"]}',
+                    1,
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      } else {
+        const order_number = log[0][0].order_number + 1;
+
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
+                    'mrtk-000006',
+                    '${value.name}',
+                    '${value["tx-byte"]}',
+                    '${value["rx-byte"]}',
+                    ${order_number},
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      }
+    }
+
+    console.log("mrtk-000005 updated");
+  } catch (error) {
+    console.log(error);
   }
 });
 
