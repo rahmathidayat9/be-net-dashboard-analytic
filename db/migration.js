@@ -10,6 +10,7 @@ const migrate = async () => {
     await database.query("DROP TABLE IF EXISTS bandwiths");
     await database.query("DROP TABLE IF EXISTS system_resources");
     await database.query("DROP TABLE IF EXISTS microtic_logs");
+    await database.query("DROP TABLE IF EXISTS routers");
     await database.query("DROP TABLE IF EXISTS ticket_logs");
     await database.query("DROP TABLE IF EXISTS tickets");
     await database.query("DROP TABLE IF EXISTS priorities");
@@ -39,6 +40,10 @@ const migrate = async () => {
 
     await database.query(
       "CREATE TABLE ticket_logs (id int NOT NULL GENERATED ALWAYS AS IDENTITY, user_id int NOT NULL REFERENCES users(id), ticket_id int NOT NULL REFERENCES tickets(id), note text NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+    );
+
+    await database.query(
+      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, uuid varchar(255) NOT NULL, name varchar(255) NOT NULL, ipaddress varchar(255) NOT NULL, user_name varchar(255) NOT NULL, pass varchar(255) NOT NULL, port varchar(255) NOT NULL, internet varchar(255) NOT NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(

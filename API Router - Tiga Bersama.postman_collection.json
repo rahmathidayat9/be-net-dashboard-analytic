@@ -1226,12 +1226,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}upload-download/mrtk-000001",
+							"raw": "{{url}}upload-download/mrtk-000006",
 							"host": [
 								"{{url}}upload-download"
 							],
 							"path": [
-								"mrtk-000001"
+								"mrtk-000006"
 							]
 						}
 					},
@@ -1328,7 +1328,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"router\": \"mrtk-000006\",\r\n    \"from_date\":\"2024-01-20\",\r\n    \"to_date\":\"2024-01-29\"\r\n}",
+							"raw": "{\r\n    \"router\": \"mrtk-000006\",\r\n    \"from_date\":\"2024-01-29\",\r\n    \"to_date\":\"2024-01-29\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1440,6 +1440,333 @@
 							],
 							"path": [
 								"2023-11-15"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "route",
+			"item": [
+				{
+					"name": "list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}route",
+							"host": [
+								"{{url}}route"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "store",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"uuid\":\"123\",\r\n    \"name\":\"ajsndxjew\",\r\n    \"ipaddress\":\"102,039.223.01\",\r\n    \"user_name\":\"shbs\",\r\n    \"pass\":\"jdxnde\",\r\n    \"internet\":\"xjbsnxs\",\r\n    \"port\":\"9222\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}route",
+							"host": [
+								"{{url}}route"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}route/1",
+							"host": [
+								"{{url}}route"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"uuid\":\"123\",\r\n    \"name\":\"ajsndxjew\",\r\n    \"ipaddress\":\"102,039.223.01\",\r\n    \"user_name\":\"shbs\",\r\n    \"pass\":\"jdxnde\",\r\n    \"internet\":\"xjbsnxs\",\r\n    \"port\":\"9222\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}route/1",
+							"host": [
+								"{{url}}route"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deactivate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}route/deactive/1",
+							"host": [
+								"{{url}}route"
+							],
+							"path": [
+								"deactive",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "activate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}route/active/1",
+							"host": [
+								"{{url}}route"
+							],
+							"path": [
+								"active",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}route/1",
+							"host": [
+								"{{url}}route"
+							],
+							"path": [
+								"1"
 							]
 						}
 					},

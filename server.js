@@ -19,6 +19,7 @@ const authRouter = require("./routes/auth");
 const bandwithRouter = require("./routes/bandwith");
 const microticLogRouter = require("./routes/microticLog");
 const priorityRouter = require("./routes/priority");
+const routeRouter = require("./routes/route");
 const systemResourceRouter = require("./routes/systemResource");
 const ticketRouter = require("./routes/ticket");
 const helper = require("./helpers");
@@ -85,6 +86,7 @@ app.use("/api/priority", priorityRouter);
 app.use("/api/ticket", ticketRouter);
 app.use("/api", microticLogRouter);
 app.use("/api/bandwith", bandwithRouter);
+app.use("/api/route", routeRouter);
 app.use("/api/system-resoource", systemResourceRouter);
 
 function getRandomNumber(min, max) {
