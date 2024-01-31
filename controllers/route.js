@@ -149,23 +149,12 @@ module.exports = {
         case !pass:
           return helper.response(res, 400, "Mohon isi pass");
           break;
-        case !internet:
-          return helper.response(res, 400, "Mohon isi internet");
-          break;
         case !port:
           return helper.response(res, 400, "Mohon isi port");
           break;
       }
 
       port = parseInt(req.body.port);
-
-      const routeExist = await database.query(`
-        SELECT * FROM routers WHERE uuid = '${uuid}'
-      `);
-
-      if (routeExist[0].length > 0) {
-        return helper.response(res, 400, "Uuid sudah terdaftar");
-      }
 
       await database.query(
         `
@@ -216,23 +205,12 @@ module.exports = {
         case !pass:
           return helper.response(res, 400, "Mohon isi pass");
           break;
-        case !internet:
-          return helper.response(res, 400, "Mohon isi internet");
-          break;
         case !port:
           return helper.response(res, 400, "Mohon isi port");
           break;
       }
 
       port = parseInt(req.body.port);
-
-      const routeExist = await database.query(`
-        SELECT * FROM routers WHERE uuid = '${uuid}' AND id <> ${id}
-      `);
-
-      if (routeExist[0].length > 0) {
-        return helper.response(res, 400, "Uuid sudah terdaftar");
-      }
 
       await database.query(
         `

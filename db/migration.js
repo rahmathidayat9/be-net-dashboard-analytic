@@ -7,6 +7,7 @@ const migrate = async () => {
   try {
     console.log("Migrating database...");
 
+    await database.query("DROP TABLE IF EXISTS internets");
     await database.query("DROP TABLE IF EXISTS bandwiths");
     await database.query("DROP TABLE IF EXISTS system_resources");
     await database.query("DROP TABLE IF EXISTS microtic_logs");
@@ -43,7 +44,11 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, uuid varchar(255) NOT NULL, name varchar(255) NOT NULL, ipaddress varchar(255) NOT NULL, user_name varchar(255) NOT NULL, pass varchar(255) NOT NULL, port varchar(255) NOT NULL, internet varchar(255) NOT NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, uuid varchar(255) NOT NULL, name varchar(255) NOT NULL, ipaddress varchar(255) NOT NULL, user_name varchar(255) NOT NULL, pass varchar(255) NOT NULL, port varchar(255) NOT NULL, internet varchar(255) NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+    );
+
+    await database.query(
+      "CREATE TABLE internets (id int NOT NULL GENERATED ALWAYS AS IDENTITY, uuid varchar(255) NOT NULL, name varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(

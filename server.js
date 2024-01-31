@@ -17,6 +17,7 @@ const localStorage = new LocalStorage("./scratch");
 const apiRouter = require("./routes/api");
 const authRouter = require("./routes/auth");
 const bandwithRouter = require("./routes/bandwith");
+const internetRouter = require("./routes/internet");
 const microticLogRouter = require("./routes/microticLog");
 const priorityRouter = require("./routes/priority");
 const routeRouter = require("./routes/route");
@@ -86,6 +87,7 @@ app.use("/api/priority", priorityRouter);
 app.use("/api/ticket", ticketRouter);
 app.use("/api", microticLogRouter);
 app.use("/api/bandwith", bandwithRouter);
+app.use("/api/internet", internetRouter);
 app.use("/api/route", routeRouter);
 app.use("/api/system-resoource", systemResourceRouter);
 
