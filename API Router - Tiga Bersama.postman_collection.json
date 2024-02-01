@@ -250,7 +250,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000002\"\n}",
+													"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000006\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -1813,6 +1813,55 @@
 							"raw": "{{url}}internet/mrtk-000005",
 							"host": [
 								"{{url}}internet"
+							],
+							"path": [
+								"mrtk-000005"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "top  host name",
+			"item": [
+				{
+					"name": "list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}top-host-name/mrtk-000005",
+							"host": [
+								"{{url}}top-host-name"
 							],
 							"path": [
 								"mrtk-000005"

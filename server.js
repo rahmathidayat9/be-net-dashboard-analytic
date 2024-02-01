@@ -23,6 +23,7 @@ const priorityRouter = require("./routes/priority");
 const routeRouter = require("./routes/route");
 const systemResourceRouter = require("./routes/systemResource");
 const ticketRouter = require("./routes/ticket");
+const topHostNameRouter = require("./routes/topHostName");
 const helper = require("./helpers");
 
 require("dotenv").config();
@@ -89,6 +90,7 @@ app.use("/api", microticLogRouter);
 app.use("/api/bandwith", bandwithRouter);
 app.use("/api/internet", internetRouter);
 app.use("/api/route", routeRouter);
+app.use("/api/top-host-name", topHostNameRouter);
 app.use("/api/system-resoource", systemResourceRouter);
 
 function getRandomNumber(min, max) {
@@ -247,7 +249,7 @@ cron.schedule("0 * * * *", async () => {
 
           await database.query(
             `
-                INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
+                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte, order_number, created_at) VALUES(
                     'mrtk-000006',
                     '${value.name}',
                     '${value["tx-byte"]}',
@@ -266,7 +268,7 @@ cron.schedule("0 * * * *", async () => {
 
           await database.query(
             `
-                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
+                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte, order_number, created_at) VALUES(
                     'mrtk-000006',
                     '${value.name}',
                     '${value["tx-byte"]}',
@@ -286,6 +288,134 @@ cron.schedule("0 * * * *", async () => {
   }
 });
 
+// top host name 000005
+cron.schedule("0 * * * *", async () => {
+  try {
+    const url =
+      process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
+
+    const params = {
+      uuid: "mrtk-000005",
+    };
+
+    const response = await axios.post(url, params);
+
+    if (response.data.success) {
+      const responseData = response.data.massage;
+
+      let arrData = [];
+
+      const log = await database.query(`
+        SELECT * FROM top_host_names WHERE router = 'mrtk-000005' ORDER BY id DESC LIMIT 1
+      `);
+
+      if (log[0].length == 0) {
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                    'mrtk-000005',
+                    '${value.name}',
+                    '${value["bytes-down"]}',
+                    1,
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      } else {
+        const order_number = log[0][0].order_number + 1;
+
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+              INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                'mrtk-000005',
+                '${value.name}',
+                '${value["bytes-down"]}',
+                    ${order_number},
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      }
+    }
+
+    console.log("mrtk-000005 updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// top host name 000006
+cron.schedule("0 * * * *", async () => {
+  try {
+    const url =
+      process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
+
+    const params = {
+      uuid: "mrtk-000006",
+    };
+
+    const response = await axios.post(url, params);
+
+    if (response.data.success) {
+      const responseData = response.data.massage;
+
+      let arrData = [];
+
+      const log = await database.query(`
+        SELECT * FROM top_host_names WHERE router = 'mrtk-000006' ORDER BY id DESC LIMIT 1
+      `);
+
+      if (log[0].length == 0) {
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                    'mrtk-000006',
+                    '${value.name}',
+                    '${value["bytes-down"]}',
+                    1,
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      } else {
+        const order_number = log[0][0].order_number + 1;
+
+        responseData.forEach(async (value) => {
+          arrData.push(value);
+
+          await database.query(
+            `
+              INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                'mrtk-000006',
+                '${value.name}',
+                '${value["bytes-down"]}',
+                    ${order_number},
+                    '${await helper.getFormatedTime("datetime")}'
+                ) RETURNING *
+              `
+          );
+        });
+      }
+    }
+
+    console.log("mrtk-000006 updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 async function triggerSocket(socket) {
   const storedData = JSON.parse(localStorage.getItem("dataInterface"));
   console.log(storedData);
@@ -300,6 +430,7 @@ async function triggerSocket(socket) {
 // app.post("/api/dashboard/send-telegram", async (req, res) => {
 //   const groupIds = ["-4010824640", "-4084355967"];
 //   let interface = req.body.interface
+//   let internet = req.body.internet
 //   let speed = req.body.speed
 
 //   const options = {
@@ -317,7 +448,7 @@ async function triggerSocket(socket) {
 //   const formattedDate = new Date().toLocaleString(locale, options);
 
 //   groupIds.forEach((groupId) => {
-//     telegram.sendMessage(groupId, 'Interface '+interface+' Mengalami down , '+formattedDate).then(() => {
+//     telegram.sendMessage(groupId, 'Interface '+interface+' Internet '+internet+' Mengalami down , '+formattedDate).then(() => {
 //       console.log(`Message sent to group ${groupId}`);
 //     }).catch((error) => {
 //       console.error(`Error sending message to group ${groupId}:`, error);
