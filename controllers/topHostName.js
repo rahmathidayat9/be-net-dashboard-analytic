@@ -30,43 +30,43 @@ module.exports = {
 
         let order_number = log[0][0].order_number;
 
-        // if (log[0].length == 0) {
-        //   order_number = 1;
+        if (log[0].length == 0) {
+          order_number = 1;
 
-        //   responseData.forEach(async (value) => {
-        //     arrData.push(value);
+          responseData.forEach(async (value) => {
+            arrData.push(value);
 
-        //     await database.query(
-        //       `
-        //         INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-        //                 '${req.params.uuid}',
-        //                 '${value.name}',
-        //                 '${value["bytes-down"]}',
-        //                 1,
-        //                 '${await helper.getFormatedTime("datetime")}'
-        //           ) RETURNING *
-        //         `
-        //     );
-        //   });
-        // } else {
-        //   order_number = order_number + 1;
+            await database.query(
+              `
+                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                        '${req.params.uuid}',
+                        '${value.name.replace("'", "")}',
+                        '${value["bytes-down"]}',
+                        1,
+                        '${await helper.getFormatedTime("datetime")}'
+                  )
+                `
+            );
+          });
+        } else {
+          order_number = order_number + 1;
 
-        //   responseData.forEach(async (value) => {
-        //     arrData.push(value);
+          responseData.forEach(async (value) => {
+            arrData.push(value);
 
-        //     await database.query(
-        //       `
-        //         INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-        //             '${req.params.uuid}',
-        //             '${value.name}',
-        //             '${value["bytes-down"]}',
-        //               ${order_number},
-        //               '${await helper.getFormatedTime("datetime")}'
-        //           ) RETURNING *
-        //         `
-        //     );
-        //   });
-        // }
+            await database.query(
+              `
+                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                    '${req.params.uuid}',
+                    '${value.name.replace("'", "")}',
+                    '${value["bytes-down"]}',
+                      ${order_number},
+                      '${await helper.getFormatedTime("datetime")}'
+                  )
+                `
+            );
+          });
+        }
 
         const data = await database.query(`
             SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${order_number}

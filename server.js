@@ -317,7 +317,7 @@ cron.schedule("0 * * * *", async () => {
             `
                 INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
                     'mrtk-000005',
-                    '${value.name}',
+                    '${value.name.replace("'", "")}',
                     '${value["bytes-down"]}',
                     1,
                     '${await helper.getFormatedTime("datetime")}'
@@ -335,7 +335,7 @@ cron.schedule("0 * * * *", async () => {
             `
               INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
                 'mrtk-000005',
-                '${value.name}',
+                '${value.name.replace("'", "")}',
                 '${value["bytes-down"]}',
                     ${order_number},
                     '${await helper.getFormatedTime("datetime")}'
