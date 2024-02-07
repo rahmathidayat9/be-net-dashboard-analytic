@@ -10,75 +10,70 @@ module.exports = {
   // NOTE ambil data
   index: async (req, res) => {
     try {
-      const url =
-        process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
+      let data = [];
 
-      const params = {
-        uuid: req.params.uuid,
-      };
+      const today = moment().format("YYYY-MM-DD");
 
-      const response = await axios.post(url, params);
+      const startLog = await database.query(`
+        SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id ASC LIMIT 1
+      `);
 
-      if (response.data.success) {
-        const responseData = response.data.massage;
-
-        let arrData = [];
-
-        const log = await database.query(`
-          SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' ORDER BY id DESC LIMIT 1
-        `);
-
-        let order_number = log[0][0].order_number;
-
-        if (log[0].length == 0) {
-          order_number = 1;
-
-          responseData.forEach(async (value) => {
-            arrData.push(value);
-
-            await database.query(
-              `
-                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-                        '${req.params.uuid}',
-                        '${value.name.replace("'", "")}',
-                        '${value["bytes-down"]}',
-                        1,
-                        '${await helper.getFormatedTime("datetime")}'
-                  )
-                `
-            );
-          });
-        } else {
-          order_number = order_number + 1;
-
-          responseData.forEach(async (value) => {
-            arrData.push(value);
-
-            await database.query(
-              `
-                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-                    '${req.params.uuid}',
-                    '${value.name.replace("'", "")}',
-                    '${value["bytes-down"]}',
-                      ${order_number},
-                      '${await helper.getFormatedTime("datetime")}'
-                  )
-                `
-            );
-          });
-        }
-
-        const data = await database.query(`
-            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${order_number}
-        `);
-
-        return helper.response(res, 200, "Data ditemukan", {
-          total: data[0].length,
-          data: data[0],
-        });
+      if (startLog[0].length == 0) {
+        return helper.response(res, 200, "No data", data);
       }
 
-      return helper.response(res, 400, "Router tidak diketahui");
+      const finalLog = await database.query(`
+        SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id DESC LIMIT 1
+      `);
+
+      const startOrderNumber = startLog[0][0].order_number;
+      const finalOrderNumber = finalLog[0][0].order_number;
+
+      const topHostName = await database.query(`
+          SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc
+      `);
+
+      if (finalOrderNumber == startOrderNumber) {
+        topHostName[0].map((t) => {
+          data.push({
+            router: t.router,
+            name: t.name,
+            bytes_down: t.bytes_down,
+          });
+        });
+      } else {
+        const topHostName = await database.query(`
+            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc
+        `);
+
+        for (let i = 0; i < topHostName[0].length; i++) {
+          const startData = await database.query(`
+            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND name = '${topHostName[0][i].name}' LIMIT 1
+            `);
+
+          if (startData[0].length == 0) {
+            data.push({
+              router: topHostName[0][i].router,
+              name: topHostName[0][i].name,
+              bytes_down: topHostName[0][i].bytes_down,
+            });
+          } else {
+            data.push({
+              router: topHostName[0][i].router,
+              name: topHostName[0][i].name,
+              bytes_down:
+                topHostName[0][i].bytes_down - startData[0][0].bytes_down,
+            });
+          }
+        }
+      }
+
+      data.sort((a, b) => (a.bytes_down < b.bytes_down ? 1 : -1));
+
+      return helper.response(res, 200, "Data ditemukan", {
+        today,
+        data,
+      });
     } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
     }

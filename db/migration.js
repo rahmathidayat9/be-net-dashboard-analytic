@@ -8,6 +8,7 @@ const migrate = async () => {
     console.log("Migrating database...");
 
     await database.query("DROP TABLE IF EXISTS internets");
+    await database.query("DROP TABLE IF EXISTS traffic_by_ports");
     await database.query("DROP TABLE IF EXISTS top_host_names");
     await database.query("DROP TABLE IF EXISTS bandwiths");
     await database.query("DROP TABLE IF EXISTS system_resources");
@@ -66,6 +67,10 @@ const migrate = async () => {
 
     await database.query(
       "CREATE TABLE top_host_names (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NULL, bytes_down varchar(255) NOT NULL, order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+    );
+
+    await database.query(
+      "CREATE TABLE traffic_by_ports (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NOT NULL, rx_byte varchar(255) NULL, tx_byte varchar(255) NOT NULL, order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(

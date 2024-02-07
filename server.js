@@ -24,6 +24,7 @@ const routeRouter = require("./routes/route");
 const systemResourceRouter = require("./routes/systemResource");
 const ticketRouter = require("./routes/ticket");
 const topHostNameRouter = require("./routes/topHostName");
+const trafficByPortRouter = require("./routes/trafficByPort");
 const helper = require("./helpers");
 
 require("dotenv").config();
@@ -91,7 +92,8 @@ app.use("/api/bandwith", bandwithRouter);
 app.use("/api/internet", internetRouter);
 app.use("/api/route", routeRouter);
 app.use("/api/top-host-name", topHostNameRouter);
-app.use("/api/system-resoource", systemResourceRouter);
+app.use("/api/traffic-by-port", trafficByPortRouter);
+app.use("/api/system-resource", systemResourceRouter);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -156,261 +158,200 @@ clientSocket.on("ether1", (data) => {
   isProcessing = false;
 });
 
-// router 000005
+// microtic_logs
 cron.schedule("0 * * * *", async () => {
   try {
     const url =
       process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
 
-    const params = {
-      uuid: "mrtk-000005",
-    };
+    for (let i = 3; i < 7; i++) {
+      const uuid = "mrtk-00000" + i;
 
-    const response = await axios.post(url, params);
+      const params = {
+        uuid,
+      };
 
-    if (response.data.success) {
-      const responseData = response.data.massage;
+      const response = await axios.post(url, params);
+      if (response.data.success) {
+        const responseData = response.data.massage;
 
-      let arrData = [];
+        let arrData = [];
 
-      const log = await database.query(`
-        SELECT * FROM microtic_logs WHERE router = 'mrtk-000005' ORDER BY id DESC LIMIT 1
-      `);
+        const log = await database.query(`
+          SELECT * FROM microtic_logs WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+        `);
 
-      if (log[0].length == 0) {
-        responseData.forEach(async (value) => {
-          arrData.push(value);
+        if (log[0].length == 0) {
+          responseData.forEach(async (value) => {
+            arrData.push(value);
 
-          await database.query(
-            `
-                INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
-                    'mrtk-000005',
-                    '${value.name}',
-                    '${value["tx-byte"]}',
-                    '${value["rx-byte"]}',
-                    1,
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
+            await database.query(
               `
-          );
-        });
-      } else {
-        const order_number = log[0][0].order_number + 1;
+                  INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
+                      '${uuid}',
+                      '${value.name}',
+                      '${value["tx-byte"]}',
+                      '${value["rx-byte"]}',
+                      1,
+                      '${await helper.getFormatedTime("datetime")}'
+                  ) RETURNING *
+                `
+            );
+          });
+        } else {
+          const order_number = log[0][0].order_number + 1;
 
-        responseData.forEach(async (value) => {
-          arrData.push(value);
+          responseData.forEach(async (value) => {
+            arrData.push(value);
 
-          await database.query(
-            `
-                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
-                    'mrtk-000005',
-                    '${value.name}',
-                    '${value["tx-byte"]}',
-                    '${value["rx-byte"]}',
-                    ${order_number},
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
+            await database.query(
               `
-          );
-        });
+                  INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
+                      '${uuid}',
+                      '${value.name}',
+                      '${value["tx-byte"]}',
+                      '${value["rx-byte"]}',
+                      ${order_number},
+                      '${await helper.getFormatedTime("datetime")}'
+                  ) RETURNING *
+                `
+            );
+          });
+        }
       }
     }
 
-    console.log("mrtk-000005 updated");
+    console.log("microtic_logs updated");
   } catch (error) {
     console.log(error);
   }
 });
 
-// router 000006
+// traffic by port
 cron.schedule("0 * * * *", async () => {
   try {
-    const url =
-      process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
+    let url = process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
 
-    const params = {
-      uuid: "mrtk-000006",
-    };
+    for (let i = 3; i < 7; i++) {
+      const uuid = "mrtk-00000" + i;
 
-    const response = await axios.post(url, params);
+      const params = {
+        uuid,
+      };
 
-    if (response.data.success) {
-      const responseData = response.data.massage;
+      let response = await axios.post(url, params);
 
-      let arrData = [];
+      if (response.data.success) {
+        const responseData = response.data.massage;
 
-      const log = await database.query(`
-        SELECT * FROM microtic_logs WHERE router = 'mrtk-000006' ORDER BY id DESC LIMIT 1
-      `);
+        const log = await database.query(`
+              SELECT * FROM traffic_by_ports WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+            `);
 
-      if (log[0].length == 0) {
-        responseData.forEach(async (value) => {
-          arrData.push(value);
-
-          await database.query(
-            `
-                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte, order_number, created_at) VALUES(
-                    'mrtk-000006',
-                    '${value.name}',
-                    '${value["tx-byte"]}',
-                    '${value["rx-byte"]}',
-                    1,
-                    '${await helper.getFormatedTime("datetime")}'
+        if (log[0].length == 0) {
+          responseData.forEach(async (value) => {
+            await database.query(
+              `
+                INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, order_number, created_at) VALUES(
+                  '${uuid}',
+                  '${value.name.replace("'", "")}',
+                  '${value["rx-byte"]}',
+                  '${value["tx-byte"]}',
+                  1,
+                  '${await helper.getFormatedTime("datetime")}'
                 ) RETURNING *
               `
-          );
-        });
-      } else {
-        const order_number = log[0][0].order_number + 1;
+            );
+          });
+        } else {
+          const order_number = log[0][0].order_number + 1;
 
-        responseData.forEach(async (value) => {
-          arrData.push(value);
-
-          await database.query(
-            `
-                INSERT INTO microtic_logs(router, name, tx_byte, rx_byte, order_number, created_at) VALUES(
-                    'mrtk-000006',
-                    '${value.name}',
-                    '${value["tx-byte"]}',
-                    '${value["rx-byte"]}',
-                    ${order_number},
-                    '${await helper.getFormatedTime("datetime")}'
+          responseData.forEach(async (value) => {
+            await database.query(
+              `
+                INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, order_number, created_at) VALUES(
+                  '${uuid}',
+                  '${value.name.replace("'", "")}',
+                  '${value["rx-byte"]}',
+                  '${value["tx-byte"]}',
+                  ${order_number},
+                  '${await helper.getFormatedTime("datetime")}'
                 ) RETURNING *
               `
-          );
-        });
+            );
+          });
+        }
       }
     }
 
-    console.log("mrtk-000005 updated");
+    console.log("top_host_name updated");
   } catch (error) {
     console.log(error);
   }
 });
 
-// top host name 000005
+// top host name
 cron.schedule("0 * * * *", async () => {
   try {
-    const url =
-      process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
+    let url = process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
 
-    const params = {
-      uuid: "mrtk-000005",
-    };
+    for (let i = 3; i < 7; i++) {
+      const uuid = "mrtk-00000" + i;
 
-    const response = await axios.post(url, params);
+      const params = {
+        uuid,
+      };
 
-    if (response.data.success) {
-      const responseData = response.data.massage;
+      let response = await axios.post(url, params);
 
-      let arrData = [];
+      if (response.data.success) {
+        const responseData = response.data.massage;
 
-      const log = await database.query(`
-        SELECT * FROM top_host_names WHERE router = 'mrtk-000005' ORDER BY id DESC LIMIT 1
-      `);
+        let arrData = [];
 
-      if (log[0].length == 0) {
-        responseData.forEach(async (value) => {
-          arrData.push(value);
+        const log = await database.query(`
+              SELECT * FROM top_host_names WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+            `);
 
-          await database.query(
-            `
-                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-                    'mrtk-000005',
-                    '${value.name.replace("'", "")}',
-                    '${value["bytes-down"]}',
-                    1,
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
+        if (log[0].length == 0) {
+          responseData.forEach(async (value) => {
+            arrData.push(value);
+
+            await database.query(
               `
-          );
-        });
-      } else {
-        const order_number = log[0][0].order_number + 1;
+                      INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                          '${uuid}',
+                          '${value.name.replace("'", "")}',
+                          '${value["bytes-down"]}',
+                          1,
+                          '${await helper.getFormatedTime("datetime")}'
+                      ) RETURNING *
+                    `
+            );
+          });
+        } else {
+          const order_number = log[0][0].order_number + 1;
 
-        responseData.forEach(async (value) => {
-          arrData.push(value);
+          responseData.forEach(async (value) => {
+            arrData.push(value);
 
-          await database.query(
-            `
-              INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-                'mrtk-000005',
-                '${value.name.replace("'", "")}',
-                '${value["bytes-down"]}',
-                    ${order_number},
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
+            await database.query(
               `
-          );
-        });
+                    INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                      '${uuid}',
+                      '${value.name.replace("'", "")}',
+                      '${value["bytes-down"]}',
+                          ${order_number},
+                          '${await helper.getFormatedTime("datetime")}'
+                      ) RETURNING *
+                    `
+            );
+          });
+        }
       }
     }
 
-    console.log("mrtk-000005 updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-// top host name 000006
-cron.schedule("0 * * * *", async () => {
-  try {
-    const url =
-      process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
-
-    const params = {
-      uuid: "mrtk-000006",
-    };
-
-    const response = await axios.post(url, params);
-
-    if (response.data.success) {
-      const responseData = response.data.massage;
-
-      let arrData = [];
-
-      const log = await database.query(`
-        SELECT * FROM top_host_names WHERE router = 'mrtk-000006' ORDER BY id DESC LIMIT 1
-      `);
-
-      if (log[0].length == 0) {
-        responseData.forEach(async (value) => {
-          arrData.push(value);
-
-          await database.query(
-            `
-                INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-                    'mrtk-000006',
-                    '${value.name}',
-                    '${value["bytes-down"]}',
-                    1,
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
-              `
-          );
-        });
-      } else {
-        const order_number = log[0][0].order_number + 1;
-
-        responseData.forEach(async (value) => {
-          arrData.push(value);
-
-          await database.query(
-            `
-              INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
-                'mrtk-000006',
-                '${value.name}',
-                '${value["bytes-down"]}',
-                    ${order_number},
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
-              `
-          );
-        });
-      }
-    }
-
-    console.log("mrtk-000006 updated");
+    console.log("top_host_name updated");
   } catch (error) {
     console.log(error);
   }

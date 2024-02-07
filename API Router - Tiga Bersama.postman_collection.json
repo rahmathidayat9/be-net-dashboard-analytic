@@ -292,7 +292,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000006\"\n}",
+											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000003\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1434,9 +1434,9 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}system-resoource/2023-11-15",
+							"raw": "{{url}}system-resource/2023-11-15",
 							"host": [
-								"{{url}}system-resoource"
+								"{{url}}system-resource"
 							],
 							"path": [
 								"2023-11-15"
@@ -1859,12 +1859,61 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}top-host-name/mrtk-000005",
+							"raw": "{{url}}top-host-name/mrtk-000006",
 							"host": [
 								"{{url}}top-host-name"
 							],
 							"path": [
-								"mrtk-000005"
+								"mrtk-000006"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "traffic by port",
+			"item": [
+				{
+					"name": "traffic by port",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}traffic-by-port/mrtk-000003",
+							"host": [
+								"{{url}}traffic-by-port"
+							],
+							"path": [
+								"mrtk-000003"
 							]
 						}
 					},
