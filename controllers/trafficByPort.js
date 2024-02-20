@@ -30,7 +30,7 @@ module.exports = {
       const finalOrderNumber = finalLog[0][0].order_number;
 
       const trafficByPort = await database.query(`
-          SELECT * FROM traffic_by_ports WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY rx_byte desc
+          SELECT * FROM traffic_by_ports WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY rx_byte desc LIMIT 5
       `);
 
       if (finalOrderNumber == startOrderNumber) {
@@ -43,10 +43,6 @@ module.exports = {
           });
         });
       } else {
-        const trafficByPort = await database.query(`
-            SELECT * FROM traffic_by_ports WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY rx_byte desc
-        `);
-
         for (let i = 0; i < trafficByPort[0].length; i++) {
           const startData = await database.query(`
             SELECT * FROM traffic_by_ports WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND name = '${trafficByPort[0][i].name}' LIMIT 1

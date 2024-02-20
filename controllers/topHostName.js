@@ -30,7 +30,7 @@ module.exports = {
       const finalOrderNumber = finalLog[0][0].order_number;
 
       const topHostName = await database.query(`
-          SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc
+          SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc LIMIT 5
       `);
 
       if (finalOrderNumber == startOrderNumber) {
@@ -42,10 +42,6 @@ module.exports = {
           });
         });
       } else {
-        const topHostName = await database.query(`
-            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc
-        `);
-
         for (let i = 0; i < topHostName[0].length; i++) {
           const startData = await database.query(`
             SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND name = '${topHostName[0][i].name}' LIMIT 1
