@@ -1,4 +1,3 @@
-const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -38,25 +37,28 @@ module.exports = {
           data.push({
             router: t.router,
             name: t.name,
+            mac_address: t.mac_address,
             bytes_down: t.bytes_down,
           });
         });
       } else {
         for (let i = 0; i < topHostName[0].length; i++) {
           const startData = await database.query(`
-            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND name = '${topHostName[0][i].name}' LIMIT 1
+            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND mac_address = '${topHostName[0][i].mac_address}' LIMIT 1
             `);
 
           if (startData[0].length == 0) {
             data.push({
               router: topHostName[0][i].router,
               name: topHostName[0][i].name,
+              mac_address: topHostName[0][i].mac_address,
               bytes_down: topHostName[0][i].bytes_down,
             });
           } else {
             data.push({
               router: topHostName[0][i].router,
               name: topHostName[0][i].name,
+              mac_address: topHostName[0][i].mac_address,
               bytes_down:
                 topHostName[0][i].bytes_down - startData[0][0].bytes_down,
             });

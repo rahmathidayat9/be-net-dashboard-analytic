@@ -1,4 +1,3 @@
-const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -38,6 +37,7 @@ module.exports = {
           data.push({
             router: t.router,
             name: t.name,
+            mac_address: t.mac_address,
             rx_byte: t.rx_byte,
             tx_byte: t.tx_byte,
           });
@@ -45,13 +45,14 @@ module.exports = {
       } else {
         for (let i = 0; i < trafficByPort[0].length; i++) {
           const startData = await database.query(`
-            SELECT * FROM traffic_by_ports WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND name = '${trafficByPort[0][i].name}' LIMIT 1
+            SELECT * FROM traffic_by_ports WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND mac_address = '${trafficByPort[0][i].mac_address}' LIMIT 1
             `);
 
           if (startData[0].length == 0) {
             data.push({
               router: trafficByPort[0][i].router,
               name: trafficByPort[0][i].name,
+              mac_address: trafficByPort[0][i].mac_address,
               rx_byte: trafficByPort[0][i].rx_byte,
               tx_byte: trafficByPort[0][i].tx_byte,
             });
@@ -59,6 +60,7 @@ module.exports = {
             data.push({
               router: trafficByPort[0][i].router,
               name: trafficByPort[0][i].name,
+              mac_address: trafficByPort[0][i].mac_address,
               rx_byte: trafficByPort[0][i].rx_byte - startData[0][0].rx_byte,
               tx_byte: trafficByPort[0][i].tx_byte - startData[0][0].tx_byte,
             });

@@ -252,11 +252,12 @@ cron.schedule("0 * * * *", async () => {
           responseData.forEach(async (value) => {
             await database.query(
               `
-                INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, order_number, created_at) VALUES(
+                INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
                   '${uuid}',
                   '${value.name.replace("'", "")}',
                   '${value["rx-byte"]}',
                   '${value["tx-byte"]}',
+                  '${value["mac-address"]}',
                   1,
                   '${await helper.getFormatedTime("datetime")}'
                 ) RETURNING *
@@ -269,11 +270,12 @@ cron.schedule("0 * * * *", async () => {
           responseData.forEach(async (value) => {
             await database.query(
               `
-                INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, order_number, created_at) VALUES(
+                INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
                   '${uuid}',
                   '${value.name.replace("'", "")}',
                   '${value["rx-byte"]}',
                   '${value["tx-byte"]}',
+                  '${value["mac-address"]}',
                   ${order_number},
                   '${await helper.getFormatedTime("datetime")}'
                 ) RETURNING *
@@ -319,10 +321,11 @@ cron.schedule("0 * * * *", async () => {
 
             await database.query(
               `
-                      INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                      INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
                           '${uuid}',
                           '${value.name.replace("'", "")}',
                           '${value["bytes-down"]}',
+                          '${value["mac-address"]}',
                           1,
                           '${await helper.getFormatedTime("datetime")}'
                       ) RETURNING *
@@ -337,10 +340,11 @@ cron.schedule("0 * * * *", async () => {
 
             await database.query(
               `
-                    INSERT INTO top_host_names(router, name, bytes_down, order_number, created_at) VALUES(
+                    INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
                       '${uuid}',
                       '${value.name.replace("'", "")}',
                       '${value["bytes-down"]}',
+                      '${value["mac-address"]}',
                           ${order_number},
                           '${await helper.getFormatedTime("datetime")}'
                       ) RETURNING *

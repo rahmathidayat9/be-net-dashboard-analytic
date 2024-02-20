@@ -66,11 +66,11 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE top_host_names (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NULL, bytes_down varchar(255) NOT NULL, order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE top_host_names (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NULL, bytes_down varchar(255) NOT NULL, mac_address text NOT NULL, order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
-      "CREATE TABLE traffic_by_ports (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NOT NULL, rx_byte varchar(255) NULL, tx_byte varchar(255) NOT NULL, order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE traffic_by_ports (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NOT NULL, rx_byte varchar(255) NULL, tx_byte varchar(255) NOT NULL, mac_address text NOT NULL,  order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
