@@ -1226,12 +1226,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}upload-download/mrtk-000006",
+							"raw": "{{url}}upload-download/mrtk-000003",
 							"host": [
 								"{{url}}upload-download"
 							],
 							"path": [
-								"mrtk-000006"
+								"mrtk-000003"
 							]
 						}
 					},
@@ -1434,12 +1434,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}system-resource/2023-11-15",
+							"raw": "{{url}}system-resource/2024-02-21",
 							"host": [
 								"{{url}}system-resource"
 							],
 							"path": [
-								"2023-11-15"
+								"2024-02-21"
 							]
 						}
 					},

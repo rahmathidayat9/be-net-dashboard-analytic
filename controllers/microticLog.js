@@ -10,69 +10,68 @@ module.exports = {
   // NOTE upload download
   uploadDownload: async (req, res) => {
     try {
-      const url =
-        process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
+      let data = [];
 
-      const params = {
-        uuid: req.params.uuid,
-      };
+      const today = moment().format("YYYY-MM-DD");
 
-      const response = await axios.post(url, params);
+      const startLog = await database.query(`
+        SELECT * FROM microtic_logs WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id ASC LIMIT 1
+      `);
 
-      if (response.data.success) {
-        const responseData = response.data.massage;
-
-        let arrData = [];
-
-        const log = await database.query(`
-          SELECT * FROM microtic_logs WHERE router = '${req.params.uuid}' ORDER BY id DESC LIMIT 1
-        `);
-
-        if (log[0].length == 0) {
-          responseData.forEach(async (value) => {
-            arrData.push(value);
-
-            await database.query(
-              `
-                  INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
-                      '${req.params.uuid}',
-                      '${value.name}',
-                      '${value["tx-byte"]}',
-                      '${value["rx-byte"]}',
-                      1,
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-            );
-          });
-        } else {
-          const order_number = log[0][0].order_number + 1;
-
-          responseData.forEach(async (value) => {
-            arrData.push(value);
-
-            await database.query(
-              `
-                  INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
-                      '${req.params.uuid}',
-                      '${value.name}',
-                      '${value["tx-byte"]}',
-                      '${value["rx-byte"]}',
-                      ${order_number},
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-            );
-          });
-        }
-
-        return helper.response(res, 200, "Data ditemukan", {
-          total: arrData.length,
-          data: arrData,
-        });
+      if (startLog[0].length == 0) {
+        return helper.response(res, 200, "No data", data);
       }
 
-      return helper.response(res, 400, "Router tidak diketahui");
+      const finalLog = await database.query(`
+        SELECT * FROM microtic_logs WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id DESC LIMIT 1
+      `);
+
+      const startOrderNumber = startLog[0][0].order_number;
+      const finalOrderNumber = finalLog[0][0].order_number;
+
+      const log = await database.query(`
+          SELECT * FROM microtic_logs WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY rx_byte desc
+      `);
+
+      if (finalOrderNumber == startOrderNumber) {
+        log[0].map((t) => {
+          data.push({
+            router: t.router,
+            name: t.name,
+            rx_byte: t.rx_byte,
+            tx_byte: t.tx_byte,
+          });
+        });
+      } else {
+        for (let i = 0; i < log[0].length; i++) {
+          const startData = await database.query(`
+            SELECT * FROM microtic_logs WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND name = '${log[0][i].mac_address}' LIMIT 1
+            `);
+
+          if (startData[0].length == 0) {
+            data.push({
+              router: log[0][i].router,
+              name: log[0][i].name,
+              rx_byte: log[0][i].rx_byte,
+              tx_byte: log[0][i].tx_byte,
+            });
+          } else {
+            data.push({
+              router: log[0][i].router,
+              name: log[0][i].name,
+              rx_byte: log[0][i].rx_byte - startData[0][0].rx_byte,
+              tx_byte: log[0][i].tx_byte - startData[0][0].tx_byte,
+            });
+          }
+        }
+      }
+
+      data.sort((a, b) => (a.rx_byte < b.rx_byte ? 1 : -1));
+
+      return helper.response(res, 200, "Data ditemukan", {
+        today,
+        data,
+      });
     } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
     }
@@ -132,6 +131,8 @@ module.exports = {
               : log.tx_byte - earlylogs[0][i].tx_byte,
         });
       });
+
+      data.sort((a, b) => (a.rx_byte < b.rx_byte ? 1 : -1));
 
       return helper.response(
         res,
@@ -266,6 +267,8 @@ module.exports = {
           });
         }
       }
+
+      data.sort((a, b) => (a.rx_byte < b.rx_byte ? 1 : -1));
 
       return helper.response(
         res,
