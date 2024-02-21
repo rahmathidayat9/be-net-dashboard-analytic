@@ -5,12 +5,12 @@ const middleware = require("../middleware");
 
 const router = express.Router();
 
-router.get("/", middleware.auth, controller.index);
-router.get("/:id", middleware.auth, controller.show);
-router.post("/", middleware.auth, controller.store);
-router.put("/active/:id", middleware.auth, controller.active);
-router.put("/deactive/:id", middleware.auth, controller.deactive);
-router.put("/:id", middleware.auth, controller.update);
-router.delete("/:id", middleware.auth, controller.destroy);
+router.get("/", controller.index);
+router.get("/:id", controller.show);
+router.post("/", controller.store);
+router.put("/active/:id", controller.active);
+router.put("/deactive/:id", controller.deactive);
+router.put("/:id", controller.update);
+router.delete("/:id", controller.destroy);
 
 module.exports = router;

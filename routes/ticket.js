@@ -5,10 +5,10 @@ const middleware = require("../middleware");
 
 const router = express.Router();
 
-router.get("/", middleware.auth, controller.index);
-router.get("/count/:status", middleware.auth, controller.count);
-router.get("/:id", middleware.auth, controller.show);
-router.post("/", middleware.auth, middleware.bottomRole, controller.store);
+router.get("/", controller.index);
+router.get("/count/:status", controller.count);
+router.get("/:id", controller.show);
+router.post("/", middleware.bottomRole, controller.store);
 router.put(
   "/closed/:id",
   middleware.auth,

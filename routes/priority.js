@@ -5,6 +5,6 @@ const middleware = require("../middleware");
 
 const router = express.Router();
 
-router.get("/", middleware.auth, controller.index);
+router.get("/", controller.index);
 
 module.exports = router;
