@@ -178,93 +178,117 @@ module.exports = {
       });
 
       if (dates.length == 1) {
-        let orders = [];
+        // let orders = [];
 
-        logs[0].forEach((l) => {
-          if (orders.length == 0) {
-            orders.push(l.order_number);
-          } else {
-            if (orders.includes(l.order_number)) {
-            } else {
-              orders.push(l.order_number);
-            }
-          }
-        });
+        // logs[0].forEach((l) => {
+        //   if (orders.length == 0) {
+        //     orders.push(l.order_number);
+        //   } else {
+        //     if (orders.includes(l.order_number)) {
+        //     } else {
+        //       orders.push(l.order_number);
+        //     }
+        //   }
+        // });
 
-        const earlylogs = await database.query(`
-        SELECT * FROM microtic_logs WHERE created_at::date = '${dates[0]}' AND order_number = ${orders[0]} AND router = '${router}' AND name = '${name}'
-        `);
+        // const earlylogs = await database.query(`
+        // SELECT * FROM microtic_logs WHERE created_at::date = '${dates[0]}' AND order_number = ${orders[0]} AND router = '${router}' AND name = '${name}'
+        // `);
 
-        const latestLog = await database.query(`
-        SELECT * FROM microtic_logs WHERE created_at::date = '${
-          dates[0]
-        }' AND order_number = ${
-          orders[orders.length - 1]
-        } AND router = '${router}' AND name = '${name}'
-        `);
+        // const latestLog = await database.query(`
+        // SELECT * FROM microtic_logs WHERE created_at::date = '${
+        //   dates[0]
+        // }' AND order_number = ${
+        //   orders[orders.length - 1]
+        // } AND router = '${router}' AND name = '${name}'
+        // `);
 
-        latestLog[0].forEach((log, i) => {
-          data.push({
-            date: moment(log.created_at).format("YYYY-MM-DD"),
-            router: log.router,
-            name: log.name,
-            rx_byte:
-              orders.length == 1
-                ? log.rx_byte
-                : log.rx_byte - earlylogs[0][i].rx_byte,
-            tx_byte:
-              orders.length == 1
-                ? log.tx_byte
-                : log.tx_byte - earlylogs[0][i].tx_byte,
-          });
+        // latestLog[0].forEach((log, i) => {
+        //   data.push({
+        //     date: moment(log.created_at).format("YYYY-MM-DD"),
+        //     router: log.router,
+        //     name: log.name,
+        //     rx_byte:
+        //       orders.length == 1
+        //         ? log.rx_byte
+        //         : log.rx_byte - earlylogs[0][i].rx_byte,
+        //     tx_byte:
+        //       orders.length == 1
+        //         ? log.tx_byte
+        //         : log.tx_byte - earlylogs[0][i].tx_byte,
+        //   });
+        // });
+        const log = await database.query(`
+            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[0]}'::date AND name = '${name}' AND router = '${router}'
+           ORDER BY rx_byte DESC LIMIT 1
+          `);
+
+        data.push({
+          date: moment(log[0][0].created_at).format("YYYY-MM-DD"),
+          router: log[0][0].router,
+          name: log[0][0].name,
+          rx_byte: log[0][0].rx_byte,
+          tx_byte: log[0][0].tx_byte,
         });
       } else {
         for (let h = 0; h < dates.length; h++) {
-          let orders = [];
+          // let orders = [];
 
-          logs = await database.query(`
-            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}'::date AND name = '${name}'
-             ORDER BY order_number asc
+          // logs = await database.query(`
+          //   SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}'::date AND name = '${name}'
+          //    ORDER BY order_number asc
+          // `);
+
+          // logs[0].forEach((l) => {
+          //   if (orders.length == 0) {
+          //     orders.push(l.order_number);
+          //   } else {
+          //     if (orders.includes(l.order_number)) {
+          //     } else {
+          //       orders.push(l.order_number);
+          //     }
+          //   }
+          // });
+
+          const log = await database.query(`
+            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}'::date AND name = '${name}' AND router = '${router}'
+           ORDER BY rx_byte DESC LIMIT 1
           `);
 
-          logs[0].forEach((l) => {
-            if (orders.length == 0) {
-              orders.push(l.order_number);
-            } else {
-              if (orders.includes(l.order_number)) {
-              } else {
-                orders.push(l.order_number);
-              }
-            }
+          data.push({
+            date: moment(log[0][0].created_at).format("YYYY-MM-DD"),
+            router: log[0][0].router,
+            name: log[0][0].name,
+            rx_byte: log[0][0].rx_byte,
+            tx_byte: log[0][0].tx_byte,
           });
+          // const earlylogs = await database.query(`
+          //   SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}' AND order_number = ${orders[0]} AND router = '${router}' AND name = '${name}'
+          // `);
 
-          const earlylogs = await database.query(`
-            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}' AND order_number = ${orders[0]} AND router = '${router}' AND name = '${name}'
-          `);
+          // const latestLog = await database.query(`
+          //   SELECT * FROM microtic_logs WHERE created_at::date = '${
+          //     dates[h]
+          //   }' AND order_number = ${
+          //   orders[orders.length - 1]
+          // } AND router = '${router}' AND name = '${name}'
+          // `);
 
-          const latestLog = await database.query(`
-            SELECT * FROM microtic_logs WHERE created_at::date = '${
-              dates[h]
-            }' AND order_number = ${
-            orders[orders.length - 1]
-          } AND router = '${router}' AND name = '${name}'
-          `);
-
-          latestLog[0].forEach((log, i) => {
-            data.push({
-              date: moment(log.created_at).format("YYYY-MM-DD"),
-              router: log.router,
-              name: log.name,
-              rx_byte:
-                orders.length == 1
-                  ? log.rx_byte
-                  : log.rx_byte - earlylogs[0][i].rx_byte,
-              tx_byte:
-                orders.length == 1
-                  ? log.tx_byte
-                  : log.tx_byte - earlylogs[0][i].tx_byte,
-            });
-          });
+          // latestLog[0].forEach((log, i) => {
+          //   data.push({
+          //     date: moment(log.created_at).format("YYYY-MM-DD"),
+          //     router: log.router,
+          //     name: log.name,
+          //     rx_byte:
+          //       orders.length == 1
+          //         ? log.rx_byte
+          //         : log.rx_byte - earlylogs[0][i].rx_byte,
+          //     tx_byte:
+          //       orders.length == 1
+          //         ? log.tx_byte
+          //         : log.tx_byte - earlylogs[0][i].tx_byte,
+          //   });
+          // });
         }
       }
 
