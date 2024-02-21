@@ -66,7 +66,7 @@ module.exports = {
         }
       }
 
-      data.sort((a, b) => (a.rx_byte < b.rx_byte ? 1 : -1));
+      data.sort((a, b) => (parseInt(a.rx_byte) < parseInt(b.rx_byte) ? 1 : -1));
 
       return helper.response(res, 200, "Data ditemukan", {
         today,
@@ -132,7 +132,7 @@ module.exports = {
         });
       });
 
-      data.sort((a, b) => (a.rx_byte < b.rx_byte ? 1 : -1));
+      data.sort((a, b) => (parseInt(a.rx_byte) < parseInt(b.rx_byte) ? 1 : -1));
 
       return helper.response(
         res,
@@ -268,7 +268,7 @@ module.exports = {
         }
       }
 
-      data.sort((a, b) => (a.rx_byte < b.rx_byte ? 1 : -1));
+      data.sort((a, b) => (parseInt(a.rx_byte) < parseInt(b.rx_byte) ? 1 : -1));
 
       return helper.response(
         res,
