@@ -148,14 +148,14 @@ module.exports = {
   // NOTE rekap upload download 2 tanggal
   uploadDownloadRecap: async (req, res) => {
     try {
-      let { router, from_date, to_date } = req.body;
+      let { router, from_date, to_date, name } = req.body;
 
       from_date = moment(from_date).format("YYYY-MM-DD");
       to_date = moment(to_date).format("YYYY-MM-DD");
 
       let logs = await database.query(`
         SELECT * FROM microtic_logs WHERE created_at::date <= '${to_date}'::date
-        AND created_at::date >= '${from_date}'::date AND router = '${router}' ORDER BY order_number asc
+        AND created_at::date >= '${from_date}'::date AND router = '${router}' AND name = '${name}' ORDER BY order_number asc
       `);
 
       if (logs[0].length == 0) {
@@ -192,7 +192,7 @@ module.exports = {
         });
 
         const earlylogs = await database.query(`
-        SELECT * FROM microtic_logs WHERE created_at::date = '${dates[0]}' AND order_number = ${orders[0]} AND router = '${router}'
+        SELECT * FROM microtic_logs WHERE created_at::date = '${dates[0]}' AND order_number = ${orders[0]} AND router = '${router}' AND name = '${name}'
         `);
 
         const latestLog = await database.query(`
@@ -200,7 +200,7 @@ module.exports = {
           dates[0]
         }' AND order_number = ${
           orders[orders.length - 1]
-        } AND router = '${router}'
+        } AND router = '${router}' AND name = '${name}'
         `);
 
         latestLog[0].forEach((log, i) => {
@@ -223,7 +223,7 @@ module.exports = {
           let orders = [];
 
           logs = await database.query(`
-            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}'::date
+            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}'::date AND name = '${name}'
              ORDER BY order_number asc
           `);
 
@@ -239,7 +239,7 @@ module.exports = {
           });
 
           const earlylogs = await database.query(`
-            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}' AND order_number = ${orders[0]} AND router = '${router}'
+            SELECT * FROM microtic_logs WHERE created_at::date = '${dates[h]}' AND order_number = ${orders[0]} AND router = '${router}' AND name = '${name}'
           `);
 
           const latestLog = await database.query(`
@@ -247,7 +247,7 @@ module.exports = {
               dates[h]
             }' AND order_number = ${
             orders[orders.length - 1]
-          } AND router = '${router}'
+          } AND router = '${router}' AND name = '${name}'
           `);
 
           latestLog[0].forEach((log, i) => {
@@ -267,8 +267,6 @@ module.exports = {
           });
         }
       }
-
-      data.sort((a, b) => (parseInt(a.rx_byte) < parseInt(b.rx_byte) ? 1 : -1));
 
       return helper.response(
         res,
