@@ -77,7 +77,7 @@ module.exports = {
 
   // NOTE hitung tiket
   count: async (req, res) => {
-    // status = pending, processed, deleted, closed, all
+    // status = pending, processed, deleted, closed, all (x)
     try {
       const status = req.params.status;
 
@@ -110,7 +110,7 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      let { cause, solution } = req.body;
+      let { cause, solution, user_id } = req.body;
 
       switch (true) {
         case !cause:
@@ -124,13 +124,13 @@ module.exports = {
       const note = `Isu terselesaikan. Penyebab: ${cause}, diselesaikan dengan: ${solution}`;
 
       await database.query(
-        `UPDATE tickets SET status = 'closed', updated_at = now() WHERE id = ${id}`
+        `UPDATE tickets SET cause = '${cause}', solution = '${solution}', status = 'closed', updated_at = now() WHERE id = ${id}`
       );
 
       await database.query(
         `
             INSERT INTO ticket_logs(user_id, ticket_id, note, created_at) VALUES(
-                '${req.user.id}',
+                '${user_id}',
                 '${id}',
                 '${note}',
                 '${await helper.getFormatedTime("datetime")}'
@@ -172,7 +172,7 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      let { reason } = req.body;
+      let { reason, user_id } = req.body;
 
       if (!reason) {
         return helper.response(res, 400, "Mohon isi reason");
@@ -187,7 +187,7 @@ module.exports = {
       await database.query(
         `
             INSERT INTO ticket_logs(user_id, ticket_id, note, created_at) VALUES(
-                '${req.user.id}',
+                '${user_id}',
                 '${id}',
                 '${reason}',
                 '${await helper.getFormatedTime("datetime")}'
@@ -206,7 +206,7 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      let { note, priority_id, due_date } = req.body;
+      let { note, priority_id, due_date, user_id } = req.body;
 
       if (!note) {
         return helper.response(res, 400, "Mohon isi note");
@@ -214,15 +214,15 @@ module.exports = {
 
       let ticket;
 
-      if (req.user.role == "teknisi" || req.user.role == "satker") {
-        ticket = await database.query(`
-          SELECT * FROM tickets WHERE id = ${id} AND user_id = ${req.user.id} AND tickets.status <> 'deleted'
-        `);
+      // if (req.user.role == "teknisi" || req.user.role == "satker") {
+        // ticket = await database.query(`
+        //   SELECT * FROM tickets WHERE id = ${id} AND user_id = ${req.user.id} AND tickets.status <> 'deleted'
+        // `);
 
-        if (ticket[0].length == 0) {
-          return helper.response(res, 400, "Data tidak ditemukan");
-        }
-      } else {
+        // if (ticket[0].length == 0) {
+        //   return helper.response(res, 400, "Data tidak ditemukan");
+        // }
+      // } else {
         ticket = await database.query(`
           SELECT * FROM tickets WHERE id = ${id} AND tickets.status <> 'deleted'
         `);
@@ -248,21 +248,22 @@ module.exports = {
         await database.query(
           `UPDATE tickets SET priority_id = ${priority_id}, due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
         );
-      }
+      // }
 
       await database.query(
         `
           INSERT INTO ticket_logs(user_id, ticket_id, note, created_at) VALUES(
-              '${req.user.id}',
+              '${user_id}',
               '${id}',
               '${note}',
               '${await helper.getFormatedTime("datetime")}'
           ) RETURNING *
         `
       );
-
+      
       return helper.response(res, 200, "Balasan berhasil dikirim");
     } catch (err) {
+      console.log(err);
       return helper.response(res, 400, "Error : " + err, err);
     }
   },
@@ -302,41 +303,41 @@ module.exports = {
             tickets.created_at DESC
       `);
 
-      if (req.user.role == "teknisi" || req.user.role == "satker") {
-        ticket = await database.query(`
-          SELECT
-            tickets."id", 
-            tickets.detail, 
-            tickets.status, 
-            tickets.created_at,
-            tickets.number,
-            tickets.due_date,
-            tickets.cause,
-            tickets.solution,
-            users."name" AS "user", 
-            priorities."name" AS priority
-          FROM
-            tickets
-            INNER JOIN
-            users
-            ON 
-              tickets.user_id = users."id"
-            LEFT JOIN
-            priorities
-            ON 
-              tickets.priority_id = priorities."id"
-          WHERE
-            tickets.id = ${id},
-            AND
-            tickets.user_id = ${req.user.id}
-            AND
-	          tickets.status <> 'pending'
-            AND
-            tickets.status <> 'deleted'
-          ORDER BY
-	          tickets.created_at DESC
-        `);
-      }
+      // if (req.user.role == "teknisi" || req.user.role == "satker") {
+      //   ticket = await database.query(`
+      //     SELECT
+      //       tickets."id", 
+      //       tickets.detail, 
+      //       tickets.status, 
+      //       tickets.created_at,
+      //       tickets.number,
+      //       tickets.due_date,
+      //       tickets.cause,
+      //       tickets.solution,
+      //       users."name" AS "user", 
+      //       priorities."name" AS priority
+      //     FROM
+      //       tickets
+      //       INNER JOIN
+      //       users
+      //       ON 
+      //         tickets.user_id = users."id"
+      //       LEFT JOIN
+      //       priorities
+      //       ON 
+      //         tickets.priority_id = priorities."id"
+      //     WHERE
+      //       tickets.id = ${id},
+      //       AND
+      //       tickets.user_id = ${req.user.id}
+      //       AND
+	    //       tickets.status <> 'pending'
+      //       AND
+      //       tickets.status <> 'deleted'
+      //     ORDER BY
+	    //       tickets.created_at DESC
+      //   `);
+      // }
 
       if (ticket[0].length == 0) {
         return helper.response(res, 400, "Data tidak ditemukan");

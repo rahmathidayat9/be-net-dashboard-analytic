@@ -366,8 +366,8 @@ async function triggerSocket(socket) {
   console.log(storedData);
   storedData.forEach((value, index) => {
     socket.emit(value, {
-      download: getRandomNumber(10000, 45000),
-      upload: getRandomNumber(10000, 45000),
+      download: getRandomNumber(10000, 4500000),
+      upload: getRandomNumber(10000, 4500000),
     });
   });
 }

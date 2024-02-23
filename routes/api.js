@@ -2,12 +2,28 @@ const express = require("express");
 const helpers = require("../helpers");
 const axios = require("axios");
 const bcrypt = require("bcrypt");
-// const database = require('../config/database')
+const database = require('../config/database')
 const router = express.Router();
 
 router.get("/", (req, res) => {
   res.send("Network Analytic Rest Api , Copyright PT.SOLUSI TIGA BERSAMA");
 });
+
+function getCurrentDateTime() {
+  const now = new Date();
+  
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+  const day = String(now.getDate()).padStart(2, '0');
+  
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  
+  const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  
+  return dateTimeString;
+}
 
 router.get("/api/dashboard/status-router", async (req, res) => {
   try {
@@ -39,6 +55,23 @@ router.get("/api/dashboard/get-router", async (req, res) => {
     return res.status(500).json({ error: "An error occurred" });
   }
 });
+
+router.get("/api/dashboard/get-internet", async (req, res) => {
+  try {
+    const uuid = req.query.uuid
+    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api/router/interface/list/print";
+    const params = {
+      "uuid": uuid,
+    };
+
+    const response = await axios.post(apiUrl, params);
+
+    return res.status(200).json(response.data.massage);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "An error occurred" });
+  }
+})
 
 router.post("/api/dashboard/add-router", async (req, res) => {
   try {
@@ -420,7 +453,7 @@ router.get("/api/dashboard/logs-sites", async (req, res) => {
 /* User Management Module  */
 router.get("/api/dashboard/list-users", async (req, res) => {
   let query = `SELECT * FROM users`;
-  // let data = await database.query(query)
+  let data = await database.query(query)
 
   res.send({
     message: "Data listed successfully",
@@ -431,13 +464,15 @@ router.get("/api/dashboard/list-users", async (req, res) => {
 
 router.post("/api/dashboard/create-users", async (req, res) => {
   let username = req.body.username;
-  let full_name = req.body.full_name;
+  let name = req.body.name;
   let password = await bcrypt.hash(req.body.password, 10);
-  let role_id = req.body.role_id;
+  let role = req.body.role_id;
+  let email = name+"@gmail.com"
+  let created_at = getCurrentDateTime();
 
-  let query = `INSERT INTO users (username, full_name, password, role_id) 
-        VALUES ('${username}', '${full_name}', '${password}', '${role_id}')`;
-  // let data = await database.query(query)
+  let query = `INSERT INTO users (username, name, email, password, role, created_at) 
+        VALUES ('${username}', '${name}', '${email}', '${password}', '${role}', '${created_at}')`;
+  let data = await database.query(query)
 
   res.send({
     message: "Data saved successfully",
@@ -448,7 +483,7 @@ router.post("/api/dashboard/create-users", async (req, res) => {
 router.get("/api/dashboard/edit-users/:id", async (req, res) => {
   let id = req.params.id;
   let query = `SELECT * FROM users WHERE id='${id}'`;
-  // let data = await database.query(query)
+  let data = await database.query(query)
 
   res.send({
     message: "Data edit successfully",
@@ -460,10 +495,10 @@ router.get("/api/dashboard/edit-users/:id", async (req, res) => {
 router.post("/api/dashboard/update-users/:id", async (req, res) => {
   let id = req.params.id;
   let query_find_user = `SELECT * FROM users WHERE id='${id}'`;
-  // let data_find_user = await database.query(query_find_user)
+  let data_find_user = await database.query(query_find_user)
 
   let username = req.body.username;
-  let full_name = req.body.full_name;
+  let full_name = req.body.name;
   let password;
 
   if (req.body.password) {
@@ -472,9 +507,9 @@ router.post("/api/dashboard/update-users/:id", async (req, res) => {
     password = data_find_user[0][0].password;
   }
 
-  let query = `UPDATE users SET username='${username}', full_name='${full_name}', password='${password}'
+  let query = `UPDATE users SET username='${username}', name='${full_name}', password='${password}'
         WHERE id=${id}`;
-  // let data = await database.query(query)
+  let data = await database.query(query)
 
   res.send({
     message: "Data update successfully",
@@ -486,7 +521,7 @@ router.post("/api/dashboard/update-users/:id", async (req, res) => {
 router.post("/api/dashboard/delete-users/:id", async (req, res) => {
   let id = req.params.id;
   let query = `DELETE FROM users WHERE id=${id}`;
-  // let data = await database.query(query)
+  let data = await database.query(query)
 
   res.send({
     message: "Data deleted successfully",
@@ -497,8 +532,8 @@ router.post("/api/dashboard/delete-users/:id", async (req, res) => {
 
 /* Helpdesk Module  */
 router.get("/api/dashboard/list-helpdesk", async (req, res) => {
-  let query = `SELECT * FROM helpdesk JOIN users ON helpdesk.user_id=users.id`;
-  // let data = await database.query(query)
+  let query = `SELECT * FROM helpdesk JOIN users ON helpdesk.request_by=users.id`;
+  let data = await database.query(query)
 
   let query_count = `SELECT
         COUNT(*) AS total,
@@ -508,8 +543,9 @@ router.get("/api/dashboard/list-helpdesk", async (req, res) => {
     FROM
         helpdesk`;
 
-  // let data_count = await database.query(query_count)
+  let data_count = await database.query(query_count)
 
+  console.log(data);
   res.send({
     message: "Data listed successfully",
     data: {
@@ -532,14 +568,12 @@ router.get("/api/dashboard/generate-helpdesk-ticket", async (req, res) => {
 });
 
 router.post("/api/dashboard/create-helpdesk", async (req, res) => {
-  let user_id = req.body.user_id || 2;
-  let subject = req.body.subject;
-  let description = req.body.description;
+  let user_id = req.body.user_id;
+  let description = req.body.detail;
   let due_date = req.body.due_date;
-  let ticket_number = req.body.ticket_number;
 
-  let query = `INSERT INTO helpdesk (code, user_id, description, status, due_date, subject, priority_level) 
-        VALUES ('${ticket_number}', '${user_id}', '${description}', '3', '${due_date}', '${subject}', '4')`;
+  let query = `INSERT INTO helpdesk (user_id, description, status, due_date, priority_level) 
+  VALUES ('${user_id}', '${description}', '3', '${due_date}', '${subject}', '4')`;
 
   res.send({
     message: "Data saved successfully",
@@ -556,7 +590,7 @@ router.post("/api/dashboard/update-helpdesk/:id", async (req, res) => {
 
   let query = `UPDATE helpdesk SET description='${description}', status='${status}', notes='${notes}'
         WHERE ticket_number=${id}`;
-  // let data = await database.query(query)
+  let data = await database.query(query)
 
   res.send({
     message: "Data update successfully",
@@ -568,7 +602,7 @@ router.post("/api/dashboard/update-helpdesk/:id", async (req, res) => {
 router.post("/api/dashboard/delete-helpdesk", async (req, res) => {
   let code = req.body.code;
   let query = `DELETE FROM helpdesk WHERE code='${code}'`;
-  // let data = await database.query(query)
+  let data = await database.query(query)
 
   res.send({
     message: "Data deleted successfully",
