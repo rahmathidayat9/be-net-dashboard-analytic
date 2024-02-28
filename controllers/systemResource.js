@@ -1,4 +1,3 @@
-const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -8,72 +7,78 @@ module.exports = {
   // NOTE generate data system resource
   index: async (req, res) => {
     try {
-      let date = req.params.date;
+      const today = moment().format("YYYY-MM-DD");
 
-      if (!date) return helper.response(res, 400, "Mohon masukan tanggal");
-
-      date = moment(date).format("YYYY-MM-DD");
-
-      let systemResource = await database.query(`
-        SELECT * FROM system_resources WHERE date::date = '${date}'
+      const startLog = await database.query(`
+        SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id ASC LIMIT 1
       `);
 
-      let data;
+      if (startLog[0].length == 0) {
+        return helper.response(res, 200, "No data", data);
+      }
 
-      if (systemResource[0].length == 0) {
-        const url = process.env.MICROTIC_API_ENV + "api/router/logs/print";
+      const finalLog = await database.query(`
+        SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id DESC LIMIT 1
+      `);
 
-        const params = {
-          uuid: "mrtk-000001",
-          date,
-          time: "8",
-          ethernet: "ether1",
-        };
+      const startOrderNumber = startLog[0][0].order_number;
+      const finalOrderNumber = finalLog[0][0].order_number;
 
-        const response = await axios.post(url, params);
+      let data = [];
 
-        if (response.status == 200) {
-          const responseData = response.data;
+      const systemResource = await database.query(`
+          SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber}
+      `);
 
-          let high_rx_bit_per_second = 0;
-          let tx_total = 0;
-          let count = 0;
+      if (finalOrderNumber == startOrderNumber) {
+        systemResource[0].map((s) => {
+          data.push({
+            router: s.router,
+            highest_memory_frequency: s.memory_frequency,
+            average_memory_frequency: s.memory_frequency,
+            highest_cpu_load: s.cpu_load,
+            average_cpu_load: s.cpu_load,
+          });
+        });
+      } else {
+        const systemResource = await database.query(`
+        SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id
+      `);
 
-          for (var i = 1; i < responseData.length; i++) {
-            const smallData = responseData[i][0];
+        let highest_memory_frequency = 0;
+        let average_memory_frequency = 0;
+        let highest_cpu_load = 0;
+        let average_cpu_load = 0;
 
-            if (high_rx_bit_per_second < smallData["rx-bits-per-second"]) {
-              high_rx_bit_per_second = smallData["rx-bits-per-second"];
-            }
+        let length = systemResource[0].length;
 
-            tx_total = parseInt(tx_total + smallData["rx-bits-per-second"]);
-
-            count++;
+        systemResource[0].map((s) => {
+          if (highest_memory_frequency < parseFloat(s.memory_frequency)) {
+            highest_memory_frequency = parseFloat(s.memory_frequency);
           }
 
-          const average_rx_bit_per_second = Math.ceil(tx_total / count);
+          if (highest_cpu_load < parseFloat(s.cpu_load)) {
+            highest_cpu_load = parseFloat(s.cpu_load);
+          }
 
-          await database.query(
-            `
-                INSERT INTO system_resources(high_rx_bit_per_second, average_rx_bit_per_second,date, created_at) VALUES(
-                    '${high_rx_bit_per_second}',
-                    '${average_rx_bit_per_second}',
-                    '${date}',
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
-              `
-          );
+          average_memory_frequency =
+            average_memory_frequency + parseFloat(s.memory_frequency);
 
-          data = await database.query(`
-                SELECT * FROM system_resources WHERE date::date = '${date}'
-            `);
+          average_cpu_load = average_cpu_load + parseFloat(s.cpu_load);
+        });
 
-          data = data[0];
-        } else {
-          return helper.response(res, 400, "Error connection: no data");
-        }
-      } else {
-        data = systemResource[0];
+        average_memory_frequency =
+          Math.ceil((average_memory_frequency / length) * 100) / 100;
+
+        average_cpu_load = Math.ceil((average_cpu_load / length) * 100) / 100;
+
+        data.push({
+          router: req.params.uuid,
+          highest_memory_frequency,
+          average_memory_frequency,
+          highest_cpu_load,
+          average_cpu_load,
+        });
       }
 
       return helper.response(res, 200, "Data ditemukan", data);

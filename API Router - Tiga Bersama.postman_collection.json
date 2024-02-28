@@ -495,7 +495,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000001\"\n}",
+											"raw": "{\n    // device \n     \"uuid\" : \"mrtk-000003\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1328,7 +1328,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"router\": \"mrtk-000006\",\r\n    \"from_date\":\"2024-01-29\",\r\n    \"to_date\":\"2024-01-29\"\r\n}",
+							"raw": "{\r\n    \"router\": \"mrtk-000006\",\r\n    \"from_date\":\"2024-02-20\",\r\n    \"to_date\":\"2024-02-21\",\r\n    \"name\":\"<pptp-lancur>\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1434,12 +1434,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}system-resource/2024-02-21",
+							"raw": "{{url}}system-resource/mrtk-000005",
 							"host": [
 								"{{url}}system-resource"
 							],
 							"path": [
-								"2024-02-21"
+								"mrtk-000005"
 							]
 						}
 					},
