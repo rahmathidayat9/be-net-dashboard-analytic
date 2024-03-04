@@ -9,7 +9,7 @@ router.get("/", controller.index);
 router.get("/count/:status", controller.count);
 router.get("/:id", controller.show);
 router.post("/", controller.store);
-router.put(
+router.post(
   "/closed/:id",
   controller.closed
 );
