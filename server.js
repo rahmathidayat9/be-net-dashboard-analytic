@@ -361,6 +361,71 @@ cron.schedule("0 * * * *", async () => {
   }
 });
 
+// system resource
+cron.schedule("0 * * * *", async () => {
+  try {
+    let url =
+      process.env.MICROTIC_API_ENV + "api/router/system/resources/print";
+
+    for (let i = 3; i < 7; i++) {
+      const uuid = "mrtk-00000" + i;
+
+      const params = {
+        uuid,
+      };
+
+      let response = await axios.post(url, params);
+
+      if (response.data.success) {
+        const log = await database.query(`
+              SELECT * FROM system_resources WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+            `);
+
+        const responseData = response.data.massage[0];
+
+        const totalMemory = responseData["total-memory"];
+        const freeMemory = responseData["free-memory"];
+
+        const memory_frequency =
+          Math.ceil(((totalMemory - freeMemory) / freeMemory) * 100 * 100) /
+          100;
+
+        if (log[0].length == 0) {
+          await database.query(
+            `
+              INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
+                  '${uuid}',
+                  '${memory_frequency}',
+                  '${responseData["cpu-load"]}',
+                  1,
+                  '${await helper.getFormatedTime("datetime")}'
+              ) RETURNING *
+            `
+          );
+        } else {
+          const order_number = log[0][0].order_number + 1;
+
+          await database.query(
+            `
+              INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
+                  '${uuid}',
+                  '${memory_frequency}',
+                  '${responseData["cpu-load"]}',
+                  ${order_number},
+                  '${await helper.getFormatedTime("datetime")}'
+              ) RETURNING *
+            `
+          );
+        }
+      }
+    }
+
+    console.log("top_host_name updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 async function triggerSocket(socket) {
   const storedData = JSON.parse(localStorage.getItem("dataInterface"));
   console.log(storedData);

@@ -62,7 +62,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE system_resources (id int NOT NULL GENERATED ALWAYS AS IDENTITY, high_rx_bit_per_second varchar(255) NOT NULL, average_rx_bit_per_second varchar(255) NOT NULL, date date NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE system_resources (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, memory_frequency decimal NOT NULL, cpu_load int NOT NULL, created_at timestamp(0) NOT NULL, order_number int NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
