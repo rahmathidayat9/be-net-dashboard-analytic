@@ -292,7 +292,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000003\"\n}",
+											"raw": "{\n    // device \n    \"uuid\" : \"mrtk-000024\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1202,7 +1202,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1226,12 +1227,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}upload-download/mrtk-000003",
+							"raw": "{{url}}upload-download/mrtk-000006",
 							"host": [
 								"{{url}}upload-download"
 							],
 							"path": [
-								"mrtk-000003"
+								"mrtk-000006"
 							]
 						}
 					},
@@ -1865,6 +1866,60 @@
 							],
 							"path": [
 								"mrtk-000006"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "top sites",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}top-host-name",
+							"host": [
+								"{{url}}top-host-name"
+							],
+							"query": [
+								{
+									"key": "from_date",
+									"value": "01-03-2024",
+									"disabled": true
+								},
+								{
+									"key": "to_date",
+									"value": "07-03-2024",
+									"disabled": true
+								}
 							]
 						}
 					},

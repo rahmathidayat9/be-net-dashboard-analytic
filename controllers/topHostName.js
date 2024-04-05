@@ -1,3 +1,5 @@
+const http = require("http"); // or 'https' for https:// URLs
+const fs = require("fs");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -73,6 +75,79 @@ module.exports = {
         data,
       });
     } catch (error) {
+      return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+
+  // NOTE ambil top sites
+  getTop: async (req, res) => {
+    try {
+      let { from_date, to_date } = req.query;
+
+      from_date = from_date ? moment(from_date).format("YYYY-MM-DD") : null;
+      to_date = to_date ? moment(to_date).format("YYYY-MM-DD") : null;
+
+      let data;
+
+      if (from_date && to_date) {
+        data = [];
+
+        let query = await database.query(`
+        SELECT * FROM top_sites_2 WHERE date::date <= '${to_date}'::date
+        AND date::date >= '${from_date}'::date
+      `);
+
+        if (query[0].query == 0) {
+          return helper.response(res, 400, "Data tidak ditemukan");
+        }
+
+        let sites = [];
+
+        query[0].forEach((q) => {
+          if (!sites.includes(q.site)) {
+            sites.push([q.site]);
+          }
+        });
+
+        for (let i = 0; i < sites.length; i++) {
+          let siteCount = await database.query(`
+            SELECT * FROM top_sites_2 WHERE date::date <= '${to_date}'::date AND date::date >= '${from_date}'::date AND site = '${sites[i][0]}'
+          `);
+
+          let totalCount = 0;
+
+          siteCount[0].forEach((s) => {
+            totalCount = totalCount + s.count;
+          });
+
+          data.push({
+            site: sites[i][0],
+            count: totalCount,
+          });
+
+          data.sort(function (a, b) {
+            var keyA = new Date(a.count),
+              keyB = new Date(b.count);
+            // Compare the 2 dates
+            if (keyB < keyA) return -1;
+            if (keyB > keyA) return 1;
+            return 0;
+          });
+        }
+      } else {
+        const today = moment().format("YYYY-MM-DD");
+
+        let query = await database.query(`
+            SELECT * FROM top_sites_2 WHERE date::date = '${today}' ORDER BY count desc 
+        `);
+
+        data = query[0];
+      }
+
+      return helper.response(res, 200, "Rekapan top site", data);
+    } catch (error) {
+      console.log(error);
+
       return helper.response(res, 400, "Error : " + error, error);
     }
   },

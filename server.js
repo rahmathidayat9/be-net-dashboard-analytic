@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const moment = require("moment");
 const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
@@ -421,6 +422,64 @@ cron.schedule("0 * * * *", async () => {
     }
 
     console.log("top_host_name updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// top host name
+cron.schedule("*/3 * * * * *", async () => {
+  try {
+    const today = moment().format("YYYY-MM-DD");
+
+    const url = "http://139.255.41.67/kid-control/data.json";
+
+    const file = fs.createWriteStream("file.json");
+
+    http.get(url, function (response) {
+      response.pipe(file);
+
+      file.on("finish", () => {
+        file.close();
+        console.log("Download Completed");
+      });
+    });
+
+    const json = JSON.parse(fs.readFileSync("./file.json", "utf-8"));
+
+    for (let i = 0; i < json.length; i++) {
+      if (json[i].activity.length > 0) {
+        let query = await database.query(`
+        SELECT * FROM top_sites_2 WHERE date::date = '${today}' AND site = '${json[i].activity}'
+        `);
+
+        if (query[0].length == 0) {
+          await database.query(
+            `
+              INSERT INTO top_sites_2(site, date, created_at) VALUES(
+                  '${json[i].activity}',
+                  '${today}',
+                  '${await helper.getFormatedTime("datetime")}'
+              ) RETURNING *
+            `
+          );
+        } else {
+          let count = query[0][0].count;
+
+          count = count + 1;
+
+          await database.query(
+            `UPDATE top_sites_2 SET count = ${count}, updated_at = now() WHERE id = '${query[0][0].id}'`
+          );
+        }
+      }
+    }
+
+    fs.truncate("file.json", 0, function () {
+      console.log("done");
+    });
+
+    console.log("top_host updated");
   } catch (error) {
     console.log(error);
   }
