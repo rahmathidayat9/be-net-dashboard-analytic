@@ -16,6 +16,7 @@ const migrate = async () => {
     await database.query("DROP TABLE IF EXISTS system_resources");
     await database.query("DROP TABLE IF EXISTS microtic_logs");
     await database.query("DROP TABLE IF EXISTS routers");
+    await database.query("DROP TABLE IF EXISTS ip_addresses");
     await database.query("DROP TABLE IF EXISTS ticket_logs");
     await database.query("DROP TABLE IF EXISTS tickets");
     await database.query("DROP TABLE IF EXISTS priorities");
@@ -49,6 +50,10 @@ const migrate = async () => {
 
     await database.query(
       "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, uuid varchar(255) NOT NULL, name varchar(255) NOT NULL, ipaddress varchar(255) NOT NULL, user_name varchar(255) NOT NULL, pass varchar(255) NOT NULL, port varchar(255) NOT NULL, internet varchar(255) NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+    );
+
+    await database.query(
+      "CREATE TABLE ip_addresses (id int NOT NULL GENERATED ALWAYS AS IDENTITY, ip varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -168,6 +173,24 @@ const migrate = async () => {
       `
         INSERT INTO priorities(name, created_at) VALUES(
             'Level 4',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
+    await database.query(
+      `
+        INSERT INTO ip_addresses(ip, created_at) VALUES(
+            '10.0.0.26',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
+    await database.query(
+      `
+        INSERT INTO ip_addresses(ip, created_at) VALUES(
+            '139.255.41.66',
             '${await helpers.getFormatedTime("datetime")}'
         )
       `

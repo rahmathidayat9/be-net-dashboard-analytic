@@ -19,6 +19,7 @@ const apiRouter = require("./routes/api");
 const authRouter = require("./routes/auth");
 const bandwithRouter = require("./routes/bandwith");
 const internetRouter = require("./routes/internet");
+const ipAddressRouter = require("./routes/ipAddress");
 const microticLogRouter = require("./routes/microticLog");
 const priorityRouter = require("./routes/priority");
 const routeRouter = require("./routes/route");
@@ -91,6 +92,7 @@ app.use("/api/ticket", ticketRouter);
 app.use("/api", microticLogRouter);
 app.use("/api/bandwith", bandwithRouter);
 app.use("/api/internet", internetRouter);
+app.use("/api/ip-address", ipAddressRouter);
 app.use("/api/route", routeRouter);
 app.use("/api/top-host-name", topHostNameRouter);
 app.use("/api/traffic-by-port", trafficByPortRouter);
@@ -430,53 +432,76 @@ cron.schedule("0 * * * *", async () => {
 // top host name
 cron.schedule("*/3 * * * * *", async () => {
   try {
-    const today = moment().format("YYYY-MM-DD");
+    const Client = require("ssh2").Client;
 
-    const url = "http://139.255.41.67/kid-control/data.json";
+    let ips = await database.query("SELECT * FROM ip_addresses");
 
-    const file = fs.createWriteStream("file.json");
+    ips = ips[0];
 
-    http.get(url, function (response) {
-      response.pipe(file);
+    ips.forEach((ip) => {
+      const conn = new Client();
 
-      file.on("finish", () => {
-        file.close();
-        console.log("Download Completed");
-      });
-    });
+      conn
+        .on("ready", async () => {
+          conn.exec(`cat /var/www/html/${ip.ip}.json`, (err, stream) => {
+            if (err) throw err;
 
-    const json = JSON.parse(fs.readFileSync("./file.json", "utf-8"));
+            let dataBuffer = "";
 
-    for (let i = 0; i < json.length; i++) {
-      if (json[i].activity.length > 0) {
-        let query = await database.query(`
-        SELECT * FROM top_sites_2 WHERE date::date = '${today}' AND site = '${json[i].activity}'
-        `);
+            stream
+              .on("close", async (code, signal) => {
+                var json = JSON.parse(dataBuffer);
 
-        if (query[0].length == 0) {
-          await database.query(
-            `
-              INSERT INTO top_sites_2(site, date, created_at) VALUES(
-                  '${json[i].activity}',
-                  '${today}',
-                  '${await helper.getFormatedTime("datetime")}'
-              ) RETURNING *
-            `
-          );
-        } else {
-          let count = query[0][0].count;
+                let success = 0;
 
-          count = count + 1;
+                for (let i = 0; i < json.length; i++) {
+                  if (json[i].activity.length > 0) {
+                    let query = await database.query(`
+                        SELECT * FROM top_sites_2 WHERE date::date = '${today}' AND site = '${json[i].activity}'
+                        `);
 
-          await database.query(
-            `UPDATE top_sites_2 SET count = ${count}, updated_at = now() WHERE id = '${query[0][0].id}'`
-          );
-        }
-      }
-    }
+                    if (query[0].length == 0) {
+                      await database.query(
+                        `
+                              INSERT INTO top_sites_2(site, date, created_at) VALUES(
+                                  '${json[i].activity}',
+                                  '${today}',
+                                  '${await helper.getFormatedTime("datetime")}'
+                              ) RETURNING *
+                            `
+                      );
+                    } else {
+                      let count = query[0][0].count;
 
-    fs.truncate("file.json", 0, function () {
-      console.log("done");
+                      count = count + 1;
+
+                      await database.query(
+                        `UPDATE top_sites_2 SET count = ${count}, updated_at = now() WHERE id = '${query[0][0].id}'`
+                      );
+                    }
+
+                    success = success + 1;
+                  }
+                }
+
+                console.log(`router ${ip.ip} done, ${success} data created`);
+
+                conn.end();
+              })
+              .on("data", (data) => {
+                dataBuffer += data;
+              })
+              .stderr.on("data", (data) => {
+                console.error("STDERR: " + data);
+              });
+          });
+        })
+        .connect({
+          host: "103.118.175.82",
+          port: 2025,
+          username: "analytic",
+          password: "dashboardanalytic",
+        });
     });
 
     console.log("top_host updated");
