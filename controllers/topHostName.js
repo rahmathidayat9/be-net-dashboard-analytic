@@ -84,8 +84,8 @@ module.exports = {
     try {
       let { from_date, to_date } = req.query;
 
-      from_date = from_date ? moment(from_date).format("YYYY-MM-DD") : null;
-      to_date = to_date ? moment(to_date).format("YYYY-MM-DD") : null;
+      from_date = from_date ?? null;
+      to_date = to_date ?? null;
 
       let data;
 
@@ -128,7 +128,7 @@ module.exports = {
           data.sort(function (a, b) {
             var keyA = new Date(a.count),
               keyB = new Date(b.count);
-            // Compare the 2 dates
+
             if (keyB < keyA) return -1;
             if (keyB > keyA) return 1;
             return 0;
@@ -138,7 +138,7 @@ module.exports = {
         const today = moment().format("YYYY-MM-DD");
 
         let query = await database.query(`
-            SELECT * FROM top_sites_2 WHERE date::date = '${today}' ORDER BY count desc 
+            SELECT site, count FROM top_sites_2 WHERE date::date = '${today}' ORDER BY count desc 
         `);
 
         data = query[0];
