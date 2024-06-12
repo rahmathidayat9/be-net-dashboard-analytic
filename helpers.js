@@ -10,6 +10,28 @@ dotenv.config();
 
 const env = process.env;
 
+const formatBytes = (bytes) => {
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  if (bytes === 0) return "0 Byte";
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
+  const value = bytes / Math.pow(1024, i);
+  return `${value.toFixed(2)} ${sizes[i]}`;
+};
+
+function generateDateArray(startDate, endDate) {
+  const dateArray = [];
+  const currentDate = new Date(startDate);
+  const endDateObj = new Date(endDate);
+
+  while (currentDate <= endDateObj) {
+    const formattedDate = currentDate.toISOString().slice(0, 10);
+    dateArray.push(formattedDate);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dateArray;
+}
+
 const sendPostData = async (url, params) => {
   const baseUrl = "https://api-mikrotik.linkdemo.web.id/api";
 
@@ -145,7 +167,9 @@ const response = async (res, statuscode, message, data = {}) => {
 
 module.exports = {
   comparePassword,
+  formatBytes,
   getRandomInt,
+  generateDateArray,
   generateTicketNumber,
   generateToken,
   generateRefreshToken,

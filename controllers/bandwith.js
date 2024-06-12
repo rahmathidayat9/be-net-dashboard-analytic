@@ -1,81 +1,96 @@
-const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
 const helper = require("../helpers");
 
 module.exports = {
-  // NOTE generate data bandwith
   index: async (req, res) => {
     try {
-      let date = req.params.date;
-
-      if (!date) return helper.response(res, 400, "Mohon masukan tanggal");
-
-      date = moment(date).format("YYYY-MM-DD");
-
-      let bandwith = await database.query(`
-        SELECT * FROM bandwiths WHERE date::date = '${date}'
+      const activeRouter = await database.query(`
+        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
       `);
 
-      let data;
+      const router = activeRouter[0][0].id;
+      const ethernet = activeRouter[0][0].ethernet;
 
-      if (bandwith[0].length == 0) {
-        const url = process.env.MICROTIC_API_ENV + "api/router/logs/print";
+      let today =
+        req.query.date !== undefined && req.query.date !== ""
+          ? moment(req.query.date).format("YYYY-MM-DD")
+          : moment().format("YYYY-MM-DD");
 
-        const params = {
-          uuid: "mrtk-000001",
-          date,
-          time: "8",
-          ethernet: "ether1",
-        };
+      let start_date =
+        req.query.start_date !== undefined && req.query.start_date !== ""
+          ? moment(req.query.start_date).format("YYYY-MM-DD")
+          : null;
 
-        const response = await axios.post(url, params);
+      let end_date =
+        req.query.end_date !== undefined && req.query.end_date !== ""
+          ? moment(req.query.end_date).format("YYYY-MM-DD")
+          : null;
 
-        if (response.status == 200) {
-          const responseData = response.data;
+      let data = [];
 
-          let high_rx_bit_per_second = 0;
-          let high_tx_bit_per_second = 0;
+      if (start_date && end_date) {
+        today = `${start_date} - ${end_date}`;
 
-          for (var i = 1; i < responseData.length; i++) {
-            const smallData = responseData[i][0];
+        const exists = await database.query(`
+            SELECT * FROM top_interfaces WHERE router = '${router}' AND date::date <= '${end_date}'::date
+            AND date::date >= '${start_date}'::date AND name = '${ethernet}' ORDER BY id ASC LIMIT 1
+          `);
 
-            console.log(smallData["rx-bits-per-second"]);
+        if (exists[0].length == 0) {
+          return helper.response(res, 200, "No data", data);
+        }
 
-            if (high_rx_bit_per_second < smallData["rx-bits-per-second"]) {
-              high_rx_bit_per_second = smallData["rx-bits-per-second"];
-            }
-
-            if (high_tx_bit_per_second < smallData["tx-bits-per-second"]) {
-              high_tx_bit_per_second = smallData["tx-bits-per-second"];
-            }
-          }
-
-          await database.query(
-            `
-                INSERT INTO bandwiths(high_rx_bit_per_second, high_tx_bit_per_second,date, created_at) VALUES(
-                    '${high_rx_bit_per_second}',
-                    '${high_tx_bit_per_second}',
-                    '${date}',
-                    '${await helper.getFormatedTime("datetime")}'
-                ) RETURNING *
-              `
-          );
-
-          data = await database.query(`
-                SELECT * FROM bandwiths WHERE date::date = '${date}'
+        const lowest = await database.query(`
+              SELECT * FROM top_interfaces WHERE date::date <= '${end_date}'::date
+            AND date::date >= '${start_date}'::date AND router = '${router}' AND name = '${ethernet}' ORDER BY id ASC LIMIT 1
             `);
 
-          data = data[0];
-        } else {
-          return helper.response(res, 400, "Error connection: no data");
-        }
+        const highest = await database.query(`
+              SELECT * FROM top_interfaces WHERE date::date <= '${end_date}'::date
+            AND date::date >= '${start_date}'::date AND router = '${router}' AND name = '${ethernet}' ORDER BY id DESC LIMIT 1
+            `);
+
+        const rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
+        const tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+
+        data = {
+          ethernet,
+          rx_byte: helper.formatBytes(rx_byte),
+          tx_byte: helper.formatBytes(tx_byte),
+        };
       } else {
-        data = bandwith[0];
+        const exists = await database.query(`
+            SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}'
+          `);
+
+        if (exists[0].length == 0) {
+          return helper.response(res, 200, "No data", data);
+        }
+
+        const lowest = await database.query(`
+            SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}' ORDER BY id ASC LIMIT 1
+          `);
+
+        const highest = await database.query(`
+            SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}' ORDER BY id DESC LIMIT 1
+          `);
+
+        const rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
+        const tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+
+        data = {
+          ethernet,
+          rx_byte: helper.formatBytes(rx_byte),
+          tx_byte: helper.formatBytes(tx_byte),
+        };
       }
 
-      return helper.response(res, 200, "Data ditemukan", data);
+      return helper.response(res, 200, "Data ditemukan", {
+        today,
+        data,
+      });
     } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
     }

@@ -12,7 +12,7 @@ const migrate = async () => {
     await database.query("DROP TABLE IF EXISTS internets");
     await database.query("DROP TABLE IF EXISTS traffic_by_ports");
     await database.query("DROP TABLE IF EXISTS top_host_names");
-    await database.query("DROP TABLE IF EXISTS bandwiths");
+    await database.query("DROP TABLE IF EXISTS top_interfaces");
     await database.query("DROP TABLE IF EXISTS system_resources");
     await database.query("DROP TABLE IF EXISTS microtic_logs");
     await database.query("DROP TABLE IF EXISTS routers");
@@ -49,7 +49,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, uuid varchar(255) NOT NULL, name varchar(255) NOT NULL, ipaddress varchar(255) NOT NULL, user_name varchar(255) NOT NULL, pass varchar(255) NOT NULL, port varchar(255) NOT NULL, internet varchar(255) NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, host varchar(255) NOT NULL, username varchar(255) NOT NULL, pass varchar(255) NOT NULL, port int NOT NULL, ethernet varchar(255) NOT NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -65,7 +65,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE bandwiths (id int NOT NULL GENERATED ALWAYS AS IDENTITY, high_rx_bit_per_second varchar(255) NOT NULL, high_tx_bit_per_second varchar(255) NOT NULL, date date NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE top_interfaces (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router int NOT NULL, name varchar(255) NOT NULL, rx_byte bigint, tx_byte bigint, date date NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -82,6 +82,10 @@ const migrate = async () => {
 
     await database.query(
       "CREATE TABLE top_sites (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NOT NULL, rx_byte varchar(255) NULL, tx_byte varchar(255) NOT NULL, mac_address text NOT NULL,  order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+    );
+
+    await database.query(
+      "CREATE TABLE top_host_names (id int NOT NULL GENERATED ALWAYS AS IDENTITY, host_name varchar(255) NOT NULL, identifier varchar(255) NOT NULL, date date NOT NULL, bytes_down bigint NOT NULL, router int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -191,6 +195,20 @@ const migrate = async () => {
       `
         INSERT INTO ip_addresses(ip, created_at) VALUES(
             '139.255.41.66',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
+    await database.query(
+      `
+        INSERT INTO routers(host,username,pass,port,ethernet,status, created_at) VALUES(
+            '191.101.190.202',
+            'monitor_stb',
+            'Joseph12345!',
+            '8042',
+            'ether1',
+            'active',
             '${await helpers.getFormatedTime("datetime")}'
         )
       `

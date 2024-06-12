@@ -1,9 +1,9 @@
-const http = require("http"); // or 'https' for https:// URLs
-const fs = require("fs");
+const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
 const helper = require("../helpers");
+const { count } = require("./ticket");
 
 require("dotenv").config();
 
@@ -11,64 +11,141 @@ module.exports = {
   // NOTE ambil data
   index: async (req, res) => {
     try {
+      let today =
+        req.query.date !== undefined && req.query.date !== ""
+          ? moment(req.query.date).format("YYYY-MM-DD")
+          : moment().format("YYYY-MM-DD");
+
+      let start_date =
+        req.query.start_date !== undefined && req.query.start_date !== ""
+          ? moment(req.query.start_date).format("YYYY-MM-DD")
+          : null;
+
+      let end_date =
+        req.query.end_date !== undefined && req.query.end_date !== ""
+          ? moment(req.query.end_date).format("YYYY-MM-DD")
+          : null;
+
       let data = [];
 
-      const today = moment().format("YYYY-MM-DD");
+      if (start_date && end_date) {
+        today = `${start_date} - ${end_date}`;
 
-      const startLog = await database.query(`
-        SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id ASC LIMIT 1
-      `);
+        const logExists = await database.query(`
+          SELECT * FROM top_host_names WHERE date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date ORDER BY id ASC LIMIT 1
+        `);
 
-      if (startLog[0].length == 0) {
-        return helper.response(res, 200, "No data", data);
-      }
+        if (logExists[0].length == 0) {
+          return helper.response(res, 200, "No data", data);
+        }
 
-      const finalLog = await database.query(`
-        SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id DESC LIMIT 1
-      `);
+        let host_name = [];
 
-      const startOrderNumber = startLog[0][0].order_number;
-      const finalOrderNumber = finalLog[0][0].order_number;
+        let query = await database.query(`
+          SELECT DISTINCT host_name FROM top_host_names WHERE date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date
+        `);
 
-      const topHostName = await database.query(`
-          SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc LIMIT 5
-      `);
+        for (let i = 0; i < query[0].length; i++) {
+          host_name.push(query[0][i].host_name);
+        }
 
-      if (finalOrderNumber == startOrderNumber) {
-        topHostName[0].map((t) => {
+        for (i = 0; i < host_name.length; i++) {
+          query = await database.query(`
+            SELECT * FROM top_host_names WHERE host_name = '${host_name[i]}' AND date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date 
+          `);
+
+          const countByte = await database.query(`
+            SELECT SUM(bytes_down) as byte_down FROM top_host_names WHERE host_name = '${host_name[i]}' AND date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date 
+          `);
+
           data.push({
-            router: t.router,
-            name: t.name,
-            mac_address: t.mac_address,
-            bytes_down: t.bytes_down,
+            host_name: host_name[i],
+            total: query[0].length,
+            byte_down: helper.formatBytes(countByte[0][0].byte_down),
           });
-        });
+        }
       } else {
-        for (let i = 0; i < topHostName[0].length; i++) {
-          const startData = await database.query(`
-            SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND mac_address = '${topHostName[0][i].mac_address}' LIMIT 1
-            `);
+        const logExists = await database.query(`
+          SELECT * FROM top_host_names WHERE date::date = '${today}' ORDER BY id ASC LIMIT 1
+        `);
 
-          if (startData[0].length == 0) {
-            data.push({
-              router: topHostName[0][i].router,
-              name: topHostName[0][i].name,
-              mac_address: topHostName[0][i].mac_address,
-              bytes_down: topHostName[0][i].bytes_down,
-            });
-          } else {
-            data.push({
-              router: topHostName[0][i].router,
-              name: topHostName[0][i].name,
-              mac_address: topHostName[0][i].mac_address,
-              bytes_down:
-                topHostName[0][i].bytes_down - startData[0][0].bytes_down,
-            });
-          }
+        if (logExists[0].length == 0) {
+          return helper.response(res, 200, "No data", data);
+        }
+
+        let host_name = [];
+
+        let query = await database.query(`
+          SELECT DISTINCT host_name FROM top_host_names WHERE date::date = '${today}'
+        `);
+
+        for (let i = 0; i < query[0].length; i++) {
+          host_name.push(query[0][i].host_name);
+        }
+
+        for (i = 0; i < host_name.length; i++) {
+          query = await database.query(`
+            SELECT * FROM top_host_names WHERE host_name = '${host_name[i]}' AND  date::date = '${today}' 
+          `);
+
+          const countByte = await database.query(`
+            SELECT SUM(bytes_down) as byte_down FROM top_host_names WHERE host_name = '${host_name[i]}' AND date::date = '${today}'
+          `);
+
+          data.push({
+            host_name: host_name[i],
+            total: query[0].length,
+            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+          });
         }
       }
 
-      data.sort((a, b) => (a.bytes_down < b.bytes_down ? 1 : -1));
+      // const startOrderNumber = startLog[0][0].order_number;
+      // const finalOrderNumber = finalLog[0][0].order_number;
+
+      // const topHostName = await database.query(`
+      //     SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber} ORDER BY bytes_down desc LIMIT 5
+      // `);
+
+      // if (finalOrderNumber == startOrderNumber) {
+      //   topHostName[0].map((t) => {
+      //     data.push({
+      //       router: t.router,
+      //       name: t.name,
+      //       mac_address: t.mac_address,
+      //       bytes_down: t.bytes_down,
+      //     });
+      //   });
+      // } else {
+      //   for (let i = 0; i < topHostName[0].length; i++) {
+      //     const startData = await database.query(`
+      //       SELECT * FROM top_host_names WHERE router = '${req.params.uuid}' AND order_number = ${startOrderNumber} AND mac_address = '${topHostName[0][i].mac_address}' LIMIT 1
+      //       `);
+
+      //     if (startData[0].length == 0) {
+      //       data.push({
+      //         router: topHostName[0][i].router,
+      //         name: topHostName[0][i].name,
+      //         mac_address: topHostName[0][i].mac_address,
+      //         bytes_down: topHostName[0][i].bytes_down,
+      //       });
+      //     } else {
+      //       data.push({
+      //         router: topHostName[0][i].router,
+      //         name: topHostName[0][i].name,
+      //         mac_address: topHostName[0][i].mac_address,
+      //         bytes_down:
+      //           topHostName[0][i].bytes_down - startData[0][0].bytes_down,
+      //       });
+      //     }
+      //   }
+      // }
+
+      data.sort((a, b) => (a.total < b.total ? 1 : -1));
 
       return helper.response(res, 200, "Data ditemukan", {
         today,
@@ -148,6 +225,115 @@ module.exports = {
     } catch (error) {
       console.log(error);
 
+      return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+
+  // NOTE ambil data by router
+  show: async (req, res) => {
+    try {
+      const router = req.params.router;
+
+      let today =
+        req.query.date !== undefined && req.query.date !== ""
+          ? moment(req.query.date).format("YYYY-MM-DD")
+          : moment().format("YYYY-MM-DD");
+
+      let start_date =
+        req.query.start_date !== undefined && req.query.start_date !== ""
+          ? moment(req.query.start_date).format("YYYY-MM-DD")
+          : null;
+
+      let end_date =
+        req.query.end_date !== undefined && req.query.end_date !== ""
+          ? moment(req.query.end_date).format("YYYY-MM-DD")
+          : null;
+
+      let data = [];
+
+      if (start_date && end_date) {
+        today = `${start_date} - ${end_date}`;
+
+        const logExists = await database.query(`
+          SELECT * FROM top_host_names WHERE router = '${router}' AND date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date ORDER BY id ASC LIMIT 1
+        `);
+
+        if (logExists[0].length == 0) {
+          return helper.response(res, 200, "No data", data);
+        }
+
+        let host_name = [];
+
+        let query = await database.query(`
+          SELECT DISTINCT host_name FROM top_host_names WHERE router = '${router}' AND date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date
+        `);
+
+        for (let i = 0; i < query[0].length; i++) {
+          host_name.push(query[0][i].host_name);
+        }
+
+        for (i = 0; i < host_name.length; i++) {
+          query = await database.query(`
+            SELECT * FROM top_host_names WHERE router = '${router}' AND host_name = '${host_name[i]}' AND date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date 
+          `);
+
+          const countByte = await database.query(`
+            SELECT SUM(bytes_down) as byte_down FROM top_host_names WHERE router = '${router}' AND host_name = '${host_name[i]}' AND date::date <= '${end_date}'::date
+          AND date::date >= '${start_date}'::date 
+          `);
+
+          data.push({
+            host_name: host_name[i],
+            total: query[0].length,
+            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+          });
+        }
+      } else {
+        const logExists = await database.query(`
+          SELECT * FROM top_host_names WHERE router = '${router}' AND date::date = '${today}' ORDER BY id ASC LIMIT 1
+        `);
+
+        if (logExists[0].length == 0) {
+          return helper.response(res, 200, "No data", data);
+        }
+
+        let host_name = [];
+
+        let query = await database.query(`
+          SELECT DISTINCT host_name FROM top_host_names WHERE router = '${router}' AND date::date = '${today}'
+        `);
+
+        for (let i = 0; i < query[0].length; i++) {
+          host_name.push(query[0][i].host_name);
+        }
+
+        for (i = 0; i < host_name.length; i++) {
+          query = await database.query(`
+            SELECT * FROM top_host_names WHERE router = '${router}' AND host_name = '${host_name[i]}' AND  date::date = '${today}' 
+          `);
+
+          const countByte = await database.query(`
+            SELECT SUM(bytes_down) as byte_down FROM top_host_names WHERE router = '${router}' AND host_name = '${host_name[i]}' AND  date::date = '${today}' 
+          `);
+
+          data.push({
+            host_name: host_name[i],
+            total: query[0].length,
+            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+          });
+        }
+      }
+
+      data.sort((a, b) => (a.total < b.total ? 1 : -1));
+
+      return helper.response(res, 200, "Data ditemukan", {
+        today,
+        data,
+      });
+    } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
     }
   },

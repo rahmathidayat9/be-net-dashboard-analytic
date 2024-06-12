@@ -4,6 +4,6 @@ const controller = require("../controllers/bandwith");
 
 const router = express.Router();
 
-router.get("/:date", controller.index);
+router.get("/", controller.index);
 
 module.exports = router;

@@ -1,11 +1,10 @@
 const express = require("express");
 
-const controller = require("../controllers/topHostName");
+const controller = require("../controllers/topInterface");
 // const middleware = require("../middleware");
 
 const router = express.Router();
 
-router.get("/", controller.index);
-router.get("/:router", controller.show);
+router.get("/:router", controller.index);
 
 module.exports = router;

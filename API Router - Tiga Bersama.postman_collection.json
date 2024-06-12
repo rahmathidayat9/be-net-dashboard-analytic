@@ -1362,7 +1362,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1381,17 +1382,30 @@
 						"header": [
 							{
 								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"url": {
-							"raw": "{{url}}bandwith/mrtk-000001",
+							"raw": "{{url}}bandwith?date=2024-05-31",
 							"host": [
 								"{{url}}bandwith"
 							],
-							"path": [
-								"mrtk-000001"
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-05-31",
+									"disabled": true
+								},
+								{
+									"key": "end_date",
+									"value": "2024-06-02",
+									"disabled": true
+								},
+								{
+									"key": "date",
+									"value": "2024-05-31",
+									"description": "harus ada kalau nggak pake periode"
+								}
 							]
 						}
 					},
@@ -1501,7 +1515,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1520,13 +1535,12 @@
 						"header": [
 							{
 								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\":\"123\",\r\n    \"name\":\"mrtk-000006\",\r\n    \"ipaddress\":\"102,039.223.01\",\r\n    \"user_name\":\"shbs\",\r\n    \"pass\":\"jdxnde\",\r\n    \"internet\":\"ether-1\",\r\n    \"port\":\"9222\"\r\n}",
+							"raw": "{\r\n    \"username\":\"mrtk-000006\",\r\n    \"host\":\"102,039.223.01\",\r\n    \"pass\":\"jdxnde\",\r\n    // \"ethernet\":\"ether-1\",\r\n    \"port\":\"9222\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1595,7 +1609,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1614,13 +1629,12 @@
 						"header": [
 							{
 								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\":\"123\",\r\n    \"name\":\"ajsndxjew\",\r\n    \"ipaddress\":\"102,039.223.01\",\r\n    \"user_name\":\"shbs\",\r\n    \"pass\":\"jdxnde\",\r\n    \"internet\":\"xjbsnxs\",\r\n    \"port\":\"9222\"\r\n}",
+							"raw": "{\r\n    \"username\":\"mrtk-000006\",\r\n    \"host\":\"102,039.223.01\",\r\n    \"pass\":\"jdxnde\",\r\n    // \"ethernet\":\"ether-1\",\r\n    \"port\":\"9222\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1628,12 +1642,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}route/1",
+							"raw": "{{url}}route/2",
 							"host": [
 								"{{url}}route"
 							],
 							"path": [
-								"1"
+								"2"
 							]
 						}
 					},
@@ -1836,7 +1850,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1855,24 +1870,36 @@
 						"header": [
 							{
 								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"url": {
-							"raw": "{{url}}top-host-name/mrtk-000006",
+							"raw": "{{url}}top-host-name?date=2024-06-11",
 							"host": [
 								"{{url}}top-host-name"
 							],
-							"path": [
-								"mrtk-000006"
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-06-01",
+									"disabled": true
+								},
+								{
+									"key": "end_date",
+									"value": "2024-06-11",
+									"disabled": true
+								},
+								{
+									"key": "date",
+									"value": "2024-06-11"
+								}
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "top sites",
+					"name": "show by router",
 					"event": [
 						{
 							"listen": "test",
@@ -1900,25 +1927,83 @@
 						"header": [
 							{
 								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"url": {
-							"raw": "{{url}}top-host-name",
+							"raw": "{{url}}top-host-name/1",
+							"host": [
+								"{{url}}top-host-name"
+							],
+							"path": [
+								"1"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-06-01",
+									"disabled": true
+								},
+								{
+									"key": "end_date",
+									"value": "2024-06-11",
+									"disabled": true
+								},
+								{
+									"key": "date",
+									"value": "2024-06-11",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "top sites (X)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}top-host-name?from_date=21-04-2024&to_date=21-05-2024",
 							"host": [
 								"{{url}}top-host-name"
 							],
 							"query": [
 								{
 									"key": "from_date",
-									"value": "01-03-2024",
-									"disabled": true
+									"value": "21-04-2024"
 								},
 								{
 									"key": "to_date",
-									"value": "07-03-2024",
-									"disabled": true
+									"value": "21-05-2024"
 								}
 							]
 						}
@@ -2166,8 +2251,174 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}ip-address/4",
+							"host": [
+								"{{url}}ip-address"
+							],
+							"path": [
+								"4"
+							]
+						}
+					},
+					"response": []
 				}
 			]
+		},
+		{
+			"name": "top interface",
+			"item": [
+				{
+					"name": "list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}top-interface/1?start_date=2024-06-01&end_date=2024-06-12",
+							"host": [
+								"{{url}}top-interface"
+							],
+							"path": [
+								"1"
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-06-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-06-12"
+								},
+								{
+									"key": "date",
+									"value": "2024-06-12",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "bandwidth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{url}}bandwith",
+					"host": [
+						"{{url}}bandwith"
+					],
+					"query": [
+						{
+							"key": "date",
+							"value": "2024-05-31",
+							"disabled": true
+						},
+						{
+							"key": "start_date",
+							"value": "2024-05-31",
+							"disabled": true
+						},
+						{
+							"key": "end_date",
+							"value": "2024-06-12",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"variable": [

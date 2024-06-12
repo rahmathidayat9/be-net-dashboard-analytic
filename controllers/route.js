@@ -131,41 +131,36 @@ module.exports = {
   // NOTE tambah route
   store: async (req, res) => {
     try {
-      let { uuid, name, ipaddress, user_name, pass, internet, port } = req.body;
+      let { host, username, pass, port, ethernet } = req.body;
 
       switch (true) {
-        case !uuid:
-          return helper.response(res, 400, "Mohon isi uuid");
+        case !host:
+          return helper.response(res, 400, "Mohon isi host");
           break;
-        case !name:
+        case !username:
           return helper.response(res, 400, "Mohon isi name");
           break;
-        case !ipaddress:
+        case !pass:
           return helper.response(res, 400, "Mohon isi ipaddress");
           break;
-        case !user_name:
+        case !port:
           return helper.response(res, 400, "Mohon isi user_name");
           break;
-        case !pass:
-          return helper.response(res, 400, "Mohon isi pass");
-          break;
-        case !port:
-          return helper.response(res, 400, "Mohon isi port");
-          break;
       }
+
+      ethernet =
+        ethernet !== undefined && ethernet !== "" ? ethernet : "ether1";
 
       port = parseInt(req.body.port);
 
       await database.query(
         `
-            INSERT INTO routers(uuid, name, ipaddress, user_name, pass, internet, port, status, created_at) VALUES(
-                '${uuid}',
-                '${name}',
-                '${ipaddress}',
-                '${user_name}',
+            INSERT INTO routers(host, username, pass, port, ethernet, status, created_at) VALUES(
+                '${host}',
+                '${username}',
                 '${pass}',
-                '${internet}',
                 '${port}',
+                '${ethernet}',
                 'active',
                 '${await helper.getFormatedTime("datetime")}'
             )
@@ -173,7 +168,7 @@ module.exports = {
       );
 
       const data = await database.query(`
-        SELECT * FROM routers WHERE uuid = '${uuid}'
+        SELECT * FROM routers WHERE host = '${host}'
     `);
 
       return helper.response(res, 201, "Data berhasil ditambahkan", data[0]);
@@ -187,41 +182,44 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      let { uuid, name, ipaddress, user_name, pass, internet, port } = req.body;
+      let { host, username, pass, port, ethernet } = req.body;
 
       switch (true) {
-        case !uuid:
-          return helper.response(res, 400, "Mohon isi uuid");
+        case !host:
+          return helper.response(res, 400, "Mohon isi host");
           break;
-        case !name:
+        case !username:
           return helper.response(res, 400, "Mohon isi name");
           break;
-        case !ipaddress:
+        case !pass:
           return helper.response(res, 400, "Mohon isi ipaddress");
           break;
-        case !user_name:
-          return helper.response(res, 400, "Mohon isi user_name");
-          break;
-        case !pass:
-          return helper.response(res, 400, "Mohon isi pass");
-          break;
         case !port:
-          return helper.response(res, 400, "Mohon isi port");
+          return helper.response(res, 400, "Mohon isi user_name");
           break;
       }
 
-      port = parseInt(req.body.port);
+      const oldData = await database.query(
+        `
+          SELECT * FROM routers WHERE id = ${id}
+        `
+      );
+
+      ethernet =
+        ethernet !== undefined && ethernet !== ""
+          ? ethernet
+          : oldData[0][0].ethernet;
 
       await database.query(
         `
-            UPDATE routers SET uuid = '${uuid}', name = '${name}', ipaddress = '${ipaddress}', user_name = '${user_name}', pass = '${pass}', internet = '${internet}', port = '${port}', updated_at = '${await helper.getFormatedTime(
+          UPDATE routers SET host = '${host}', username = '${username}', pass = '${pass}', ethernet = '${ethernet}', port = '${port}', updated_at = '${await helper.getFormatedTime(
           "datetime"
         )}' WHERE id = ${id}
-          `
+        `
       );
 
       const data = await database.query(`
-        SELECT * FROM routers WHERE uuid = '${uuid}'
+        SELECT * FROM routers WHERE id = '${id}'
     `);
 
       return helper.response(res, 200, "Data berhasil diperbaharui", data[0]);
