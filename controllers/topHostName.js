@@ -3,7 +3,6 @@ const moment = require("moment");
 
 const database = require("../config/database");
 const helper = require("../helpers");
-const { count } = require("./ticket");
 
 require("dotenv").config();
 

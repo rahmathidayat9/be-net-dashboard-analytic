@@ -2363,6 +2363,72 @@
 			]
 		},
 		{
+			"name": "top sites",
+			"item": [
+				{
+					"name": "list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}top-sites/1",
+							"host": [
+								"{{url}}top-sites"
+							],
+							"path": [
+								"1"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-05-31",
+									"disabled": true
+								},
+								{
+									"key": "start_date",
+									"value": "2024-05-31",
+									"disabled": true
+								},
+								{
+									"key": "end_date",
+									"value": "2024-06-12",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "bandwidth",
 			"event": [
 				{

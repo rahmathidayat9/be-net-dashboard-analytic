@@ -26,6 +26,7 @@ const routeRouter = require("./routes/route");
 const systemResourceRouter = require("./routes/systemResource");
 const ticketRouter = require("./routes/ticket");
 const topHostNameRouter = require("./routes/topHostName");
+const topSiteRouter = require("./routes/topSite");
 const topInterfaceRouter = require("./routes/topInterface");
 const trafficByPortRouter = require("./routes/trafficByPort");
 const helper = require("./helpers");
@@ -97,6 +98,7 @@ app.use("/api/ip-address", ipAddressRouter);
 app.use("/api/route", routeRouter);
 app.use("/api/top-host-name", topHostNameRouter);
 app.use("/api/top-interface", topInterfaceRouter);
+app.use("/api/top-sites", topSiteRouter);
 app.use("/api/traffic-by-port", trafficByPortRouter);
 app.use("/api/system-resource", systemResourceRouter);
 
@@ -549,6 +551,63 @@ cron.schedule("*/3 * * * * *", async () => {
                       '${today}',
                       '${data[j].name}',
                       '${routers[i].id}',
+                      '${await helper.getFormatedTime("datetime")}'
+                  ) RETURNING *
+                `
+                );
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+      }
+    }
+
+    console.log("top host name updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// top_sites
+cron.schedule("*/3 * * * * *", async () => {
+  try {
+    const today = moment().format("YYYY-MM-DD");
+
+    let routers = await database.query(`
+   SELECT * FROM routers WHERE deleted_at IS NULL
+  `);
+
+    if (routers[0].length > 0) {
+      routers = routers[0];
+
+      for (let i = 0; i < routers.length; i++) {
+        const url = `${process.env.MICROTIC_API_ENV}top-sites/${routers[i].id}`;
+
+        axios
+          .get(url, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+          .then(async (response) => {
+            const data = response.data;
+
+            for (let j = 0; j < data.length; j++) {
+              const log = await database.query(`
+              SELECT * FROM top_sites WHERE identifier = '${data[j].id}'
+            `);
+
+              if (log[0].length == 0) {
+                await database.query(
+                  `
+                  INSERT INTO top_sites(identifier, date, name, router, activity, created_at) VALUES(
+                      '${data[j].id}',
+                      '${today}',
+                      '${data[j].name}',
+                      '${routers[i].id}',
+                      '${data[j].activity}',
                       '${await helper.getFormatedTime("datetime")}'
                   ) RETURNING *
                 `
