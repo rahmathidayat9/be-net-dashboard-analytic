@@ -1,3 +1,4 @@
+const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -7,83 +8,69 @@ module.exports = {
   // NOTE generate data system resource
   index: async (req, res) => {
     try {
+      const router = req.params.router;
+
       const today = moment().format("YYYY-MM-DD");
 
-      const startLog = await database.query(`
-        SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id ASC LIMIT 1
+      const log = await database.query(`
+        SELECT * FROM system_resources WHERE router = '${router}' AND  created_at::date = '${today}' ORDER BY id
       `);
 
-      if (startLog[0].length == 0) {
+      if (log[0].length == 0) {
         return helper.response(res, 200, "No data", data);
       }
 
-      const finalLog = await database.query(`
-        SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id DESC LIMIT 1
-      `);
+      let cpus = [];
+      let memories = [];
+      let hdds = [];
 
-      const startOrderNumber = startLog[0][0].order_number;
-      const finalOrderNumber = finalLog[0][0].order_number;
+      log[0].map((l) => {
+        cpus.push(l.cpu);
+        hdds.push(l.hdd);
+        memories.push(l.memory);
+      });
 
-      let data = [];
+      cpus = cpus.map(Number);
+      hdds = hdds.map(Number);
+      memories = memories.map(Number);
 
-      const systemResource = await database.query(`
-          SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND order_number = ${finalOrderNumber}
-      `);
+      const cpu = helper.getAveragefromArray(cpus).toFixed(2);
+      const memory = helper.getAveragefromArray(memories).toFixed(2);
+      const hdd = helper.getAveragefromArray(hdds).toFixed(2);
 
-      if (finalOrderNumber == startOrderNumber) {
-        systemResource[0].map((s) => {
-          data.push({
-            router: s.router,
-            highest_memory_frequency: s.memory_frequency,
-            average_memory_frequency: s.memory_frequency,
-            highest_cpu_load: s.cpu_load,
-            average_cpu_load: s.cpu_load,
-          });
-        });
-      } else {
-        const systemResource = await database.query(`
-        SELECT * FROM system_resources WHERE router = '${req.params.uuid}' AND  created_at::date = '${today}' ORDER BY id
-      `);
-
-        let highest_memory_frequency = 0;
-        let average_memory_frequency = 0;
-        let highest_cpu_load = 0;
-        let average_cpu_load = 0;
-
-        let length = systemResource[0].length;
-
-        systemResource[0].map((s) => {
-          if (highest_memory_frequency < parseFloat(s.memory_frequency)) {
-            highest_memory_frequency = parseFloat(s.memory_frequency);
-          }
-
-          if (highest_cpu_load < parseFloat(s.cpu_load)) {
-            highest_cpu_load = parseFloat(s.cpu_load);
-          }
-
-          average_memory_frequency =
-            average_memory_frequency + parseFloat(s.memory_frequency);
-
-          average_cpu_load = average_cpu_load + parseFloat(s.cpu_load);
-        });
-
-        average_memory_frequency =
-          Math.ceil((average_memory_frequency / length) * 100) / 100;
-
-        average_cpu_load = Math.ceil((average_cpu_load / length) * 100) / 100;
-
-        data.push({
-          router: req.params.uuid,
-          highest_memory_frequency,
-          average_memory_frequency,
-          highest_cpu_load,
-          average_cpu_load,
-        });
-      }
+      const data = {
+        cpu: cpu + "%",
+        hdd: hdd + "%",
+        memory: memory + "%",
+      };
 
       return helper.response(res, 200, "Data ditemukan", data);
     } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+
+  getDataSystemResourceIo: async ({ router }) => {
+    try {
+      const url = `${process.env.MICROTIC_API_ENV}system/resources/${router}`;
+
+      axios
+        .get(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then(async (response) => {
+          return response.data;
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+
+          return error;
+        });
+    } catch (error) {
+      console.log(error);
+      return error.message;
     }
   },
 };

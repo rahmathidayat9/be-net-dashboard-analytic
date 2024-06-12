@@ -91,6 +91,17 @@ const generateRefreshToken = async (id) => {
   return token[0][0].token;
 };
 
+const getAveragefromArray = (array) => {
+  const sum = array.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0
+  );
+
+  const avg = sum / array.length;
+
+  return avg;
+};
+
 const getFormatedTime = (format) => {
   var now = new Date();
 
@@ -173,6 +184,7 @@ module.exports = {
   generateTicketNumber,
   generateToken,
   generateRefreshToken,
+  getAveragefromArray,
   getFormatedTime,
   hashPassword,
   sendPostData,

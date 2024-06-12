@@ -30,6 +30,7 @@ const topSiteRouter = require("./routes/topSite");
 const topInterfaceRouter = require("./routes/topInterface");
 const trafficByPortRouter = require("./routes/trafficByPort");
 const helper = require("./helpers");
+const { getDataSystemResourceIo } = require("./controllers/systemResource");
 
 require("dotenv").config();
 
@@ -514,118 +515,118 @@ clientSocket.on("ether1", (data) => {
 //   }
 // });
 // top_host_names
-cron.schedule("*/3 * * * * *", async () => {
-  try {
-    const today = moment().format("YYYY-MM-DD");
+// cron.schedule("*/3 * * * * *", async () => {
+//   try {
+//     const today = moment().format("YYYY-MM-DD");
 
-    let routers = await database.query(`
-   SELECT * FROM routers WHERE deleted_at IS NULL
-  `);
+//     let routers = await database.query(`
+//    SELECT * FROM routers WHERE deleted_at IS NULL
+//   `);
 
-    if (routers[0].length > 0) {
-      routers = routers[0];
+//     if (routers[0].length > 0) {
+//       routers = routers[0];
 
-      for (let i = 0; i < routers.length; i++) {
-        const url = `${process.env.MICROTIC_API_ENV}top-host-name/${routers[i].id}`;
+//       for (let i = 0; i < routers.length; i++) {
+//         const url = `${process.env.MICROTIC_API_ENV}top-host-name/${routers[i].id}`;
 
-        axios
-          .get(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then(async (response) => {
-            const data = response.data;
+//         axios
+//           .get(url, {
+//             headers: {
+//               "Content-Type": "application/json",
+//             },
+//           })
+//           .then(async (response) => {
+//             const data = response.data;
 
-            for (let j = 0; j < data.length; j++) {
-              const log = await database.query(`
-              SELECT * FROM top_host_names WHERE identifier = '${data[j].id}'
-            `);
+//             for (let j = 0; j < data.length; j++) {
+//               const log = await database.query(`
+//               SELECT * FROM top_host_names WHERE identifier = '${data[j].id}'
+//             `);
 
-              if (log[0].length == 0) {
-                await database.query(
-                  `
-                  INSERT INTO top_host_names(identifier, bytes_down, date, host_name, router, created_at) VALUES(
-                      '${data[j].id}',
-                      '${data[j].bytes_down}',
-                      '${today}',
-                      '${data[j].name}',
-                      '${routers[i].id}',
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-                );
-              }
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
-      }
-    }
+//               if (log[0].length == 0) {
+//                 await database.query(
+//                   `
+//                   INSERT INTO top_host_names(identifier, bytes_down, date, host_name, router, created_at) VALUES(
+//                       '${data[j].id}',
+//                       '${data[j].bytes_down}',
+//                       '${today}',
+//                       '${data[j].name}',
+//                       '${routers[i].id}',
+//                       '${await helper.getFormatedTime("datetime")}'
+//                   ) RETURNING *
+//                 `
+//                 );
+//               }
+//             }
+//           })
+//           .catch((error) => {
+//             console.error("Error fetching data:", error);
+//           });
+//       }
+//     }
 
-    console.log("top host name updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
+//     console.log("top host name updated");
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
-// top_sites
-cron.schedule("*/3 * * * * *", async () => {
-  try {
-    const today = moment().format("YYYY-MM-DD");
+// // top_sites
+// cron.schedule("*/3 * * * * *", async () => {
+//   try {
+//     const today = moment().format("YYYY-MM-DD");
 
-    let routers = await database.query(`
-   SELECT * FROM routers WHERE deleted_at IS NULL
-  `);
+//     let routers = await database.query(`
+//    SELECT * FROM routers WHERE deleted_at IS NULL
+//   `);
 
-    if (routers[0].length > 0) {
-      routers = routers[0];
+//     if (routers[0].length > 0) {
+//       routers = routers[0];
 
-      for (let i = 0; i < routers.length; i++) {
-        const url = `${process.env.MICROTIC_API_ENV}top-sites/${routers[i].id}`;
+//       for (let i = 0; i < routers.length; i++) {
+//         const url = `${process.env.MICROTIC_API_ENV}top-sites/${routers[i].id}`;
 
-        axios
-          .get(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then(async (response) => {
-            const data = response.data;
+//         axios
+//           .get(url, {
+//             headers: {
+//               "Content-Type": "application/json",
+//             },
+//           })
+//           .then(async (response) => {
+//             const data = response.data;
 
-            for (let j = 0; j < data.length; j++) {
-              const log = await database.query(`
-              SELECT * FROM top_sites WHERE identifier = '${data[j].id}'
-            `);
+//             for (let j = 0; j < data.length; j++) {
+//               const log = await database.query(`
+//               SELECT * FROM top_sites WHERE identifier = '${data[j].id}'
+//             `);
 
-              if (log[0].length == 0) {
-                await database.query(
-                  `
-                  INSERT INTO top_sites(identifier, date, name, router, activity, created_at) VALUES(
-                      '${data[j].id}',
-                      '${today}',
-                      '${data[j].name}',
-                      '${routers[i].id}',
-                      '${data[j].activity}',
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-                );
-              }
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
-      }
-    }
+//               if (log[0].length == 0) {
+//                 await database.query(
+//                   `
+//                   INSERT INTO top_sites(identifier, date, name, router, activity, created_at) VALUES(
+//                       '${data[j].id}',
+//                       '${today}',
+//                       '${data[j].name}',
+//                       '${routers[i].id}',
+//                       '${data[j].activity}',
+//                       '${await helper.getFormatedTime("datetime")}'
+//                   ) RETURNING *
+//                 `
+//                 );
+//               }
+//             }
+//           })
+//           .catch((error) => {
+//             console.error("Error fetching data:", error);
+//           });
+//       }
+//     }
 
-    console.log("top host name updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
+//     console.log("top host name updated");
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 // top interface
 cron.schedule("0 * * * *", async () => {
@@ -652,10 +653,6 @@ cron.schedule("0 * * * *", async () => {
             const data = response.data;
 
             for (let j = 0; j < data.length; j++) {
-              const log = await database.query(`
-              SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND date = '${today}' AND name = '${data.name}'
-            `);
-
               await database.query(
                 `
               INSERT INTO top_interfaces(router, name, rx_byte, tx_byte, date, created_at) VALUES(
@@ -677,6 +674,55 @@ cron.schedule("0 * * * *", async () => {
     }
 
     console.log("top interface updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// system resource
+cron.schedule("0 * * * *", async () => {
+  try {
+    const today = moment().format("YYYY-MM-DD");
+
+    let routers = await database.query(`
+      SELECT * FROM routers WHERE deleted_at IS NULL
+    `);
+
+    if (routers[0].length > 0) {
+      routers = routers[0];
+
+      for (let i = 0; i < routers.length; i++) {
+        const url = `${process.env.MICROTIC_API_ENV}system/resources/${routers[i].id}`;
+
+        axios
+          .get(url, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+          .then(async (response) => {
+            const data = response.data;
+
+            await database.query(
+              `
+            INSERT INTO system_resources(router, cpu, hdd, memory, date, created_at) VALUES(
+                '${routers[i].id}',
+                '${data.cpu}',
+                '${data.hdd}',
+                '${data.memory}',
+                '${today}',
+                '${await helper.getFormatedTime("datetime")}'
+            ) RETURNING *
+          `
+            );
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+      }
+    }
+
+    console.log("system resource updated");
   } catch (error) {
     console.log(error);
   }
@@ -744,6 +790,16 @@ io.on("connection", async (socket) => {
       res.send("stop");
     } else {
       res.send("Cron job is not running");
+    }
+  });
+
+  socket.on("system-resource", async ({ router }) => {
+    try {
+      const data = await getDataSystemResourceIo({ router });
+
+      io.emit("new-data", data);
+    } catch (error) {
+      console.log(error);
     }
   });
 

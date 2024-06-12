@@ -4,6 +4,6 @@ const controller = require("../controllers/systemResource");
 
 const router = express.Router();
 
-router.get("/:uuid", controller.index);
+router.get("/:router", controller.index);
 
 module.exports = router;

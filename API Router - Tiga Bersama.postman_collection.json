@@ -1425,7 +1425,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1449,12 +1450,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}system-resource/mrtk-000005",
+							"raw": "{{url}}system-resource/1",
 							"host": [
 								"{{url}}system-resource"
 							],
 							"path": [
-								"mrtk-000005"
+								"1"
 							]
 						}
 					},
