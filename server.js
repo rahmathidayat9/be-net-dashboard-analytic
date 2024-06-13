@@ -29,6 +29,8 @@ const topHostNameRouter = require("./routes/topHostName");
 const topSiteRouter = require("./routes/topSite");
 const topInterfaceRouter = require("./routes/topInterface");
 const trafficByPortRouter = require("./routes/trafficByPort");
+const userRouter = require("./routes/user");
+const profileRoute = require("./routes/profile");
 const helper = require("./helpers");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
 
@@ -102,6 +104,8 @@ app.use("/api/top-interface", topInterfaceRouter);
 app.use("/api/top-sites", topSiteRouter);
 app.use("/api/traffic-by-port", trafficByPortRouter);
 app.use("/api/system-resource", systemResourceRouter);
+app.use("/api/users", userRouter);
+app.use("/api/profile", profileRoute);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
