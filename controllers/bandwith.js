@@ -1,3 +1,4 @@
+const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -93,6 +94,53 @@ module.exports = {
       });
     } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+
+  getCurrentTxRxIo: async ({ router }) => {
+    try {
+      let data;
+
+      const query = await database.query(`
+        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active' AND id = '${router}'
+      `);
+
+      const id = query[0][0].id;
+      const ethernet = query[0][0].ethernet;
+
+      const url = `${process.env.MICROTIC_API_ENV}interfaces/${id}`;
+
+      axios
+        .get(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then(async (response) => {
+          const data = response.data;
+
+          for (let j = 0; j < data.length; j++) {
+            if (data[j].name == ethernet) {
+              data = {
+                rx_byte: helper.formatBytes(data[j].rx_byte),
+                tx_byte: helper.formatBytes(data[j].tx_byte),
+              };
+
+              return data;
+            } else {
+              continue;
+            }
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          return error;
+        });
+
+      return data;
+    } catch (errorRes) {
+      console.log(errorRes);
+      return errorRes;
     }
   },
 };

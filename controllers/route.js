@@ -161,7 +161,7 @@ module.exports = {
                 '${pass}',
                 '${port}',
                 '${ethernet}',
-                'active',
+                'deactive',
                 '${await helper.getFormatedTime("datetime")}'
             )
           `

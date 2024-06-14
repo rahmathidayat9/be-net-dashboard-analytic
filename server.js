@@ -33,6 +33,7 @@ const userRouter = require("./routes/user");
 const profileRoute = require("./routes/profile");
 const helper = require("./helpers");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
+const { getCurrentTxRxIo } = require("./controllers/bandwith");
 
 require("dotenv").config();
 
@@ -105,7 +106,7 @@ app.use("/api/top-sites", topSiteRouter);
 app.use("/api/traffic-by-port", trafficByPortRouter);
 app.use("/api/system-resource", systemResourceRouter);
 app.use("/api/users", userRouter);
-app.use("/api/profile", profileRoute);
+app.use("/api/profile1", profileRoute);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -800,6 +801,16 @@ io.on("connection", async (socket) => {
   socket.on("system-resource", async ({ router }) => {
     try {
       const data = await getDataSystemResourceIo({ router });
+
+      io.emit("new-data", data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  socket.on("bandwith", async ({ router }) => {
+    try {
+      const data = await getCurrentTxRxIo({ router });
 
       io.emit("new-data", data);
     } catch (error) {
