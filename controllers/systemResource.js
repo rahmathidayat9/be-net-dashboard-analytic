@@ -54,20 +54,13 @@ module.exports = {
     try {
       const url = `${process.env.MICROTIC_API_ENV}system/resources/${router}`;
 
-      axios
-        .get(url, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then(async (response) => {
-          return response.data;
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-          return error;
-        });
+      return response.data;
     } catch (error) {
       console.log(error);
       return error.message;

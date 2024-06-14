@@ -99,7 +99,7 @@ module.exports = {
 
   getCurrentTxRxIo: async ({ router }) => {
     try {
-      let data;
+      let result;
 
       const query = await database.query(`
         SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active' AND id = '${router}'
@@ -110,34 +110,24 @@ module.exports = {
 
       const url = `${process.env.MICROTIC_API_ENV}interfaces/${id}`;
 
-      axios
-        .get(url, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then(async (response) => {
-          const data = response.data;
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-          for (let j = 0; j < data.length; j++) {
-            if (data[j].name == ethernet) {
-              data = {
-                rx_byte: helper.formatBytes(data[j].rx_byte),
-                tx_byte: helper.formatBytes(data[j].tx_byte),
-              };
+      const data = response.data;
 
-              return data;
-            } else {
-              continue;
-            }
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          return error;
-        });
+      for (let j = 0; j < data.length; j++) {
+        if (data[j].name == ethernet) {
+          result = {
+            rx_byte: helper.formatBytes(data[j].rx_byte),
+            tx_byte: helper.formatBytes(data[j].tx_byte),
+          };
 
-      return data;
+          return result;
+        }
+      }
     } catch (errorRes) {
       console.log(errorRes);
       return errorRes;

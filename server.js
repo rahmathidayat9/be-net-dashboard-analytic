@@ -815,6 +815,7 @@ io.on("connection", async (socket) => {
       io.emit("new-data", data);
     } catch (error) {
       console.log(error);
+      io.emit("error", { message: error.message });
     }
   });
 

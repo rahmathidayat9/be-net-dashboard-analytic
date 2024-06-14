@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"
+    integrity="sha512-luMnTJZ7oEchNDZAtQhgjomP1eZefnl82ruTH/3Oj/Yu5qYtwL7+dVRccACS/Snp1lFXq188XFipHKYE75IaQQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script>
+    var socket = io("http://localhost:3000");
+
+    socket.on("connect", () => {
+      console.log("connected to server");
+
+      socket.emit("system-resource", { router: "1" });
+    });
+
+    socket.on("new-data", function (data) {
+      console.log("Received new data from server:", data);
+    });
+
+    socket.on("error", function (error) {
+      console.log("Error from server:", error.message);
+    });
+
+    socket.on("disconnect", function () {
+      console.log("Disconnected from server");
+    });
+  </script>
+</html>
