@@ -5,6 +5,7 @@ const controller = require("../controllers/topInterface");
 
 const router = express.Router();
 
+router.get("/graph/:router", controller.getGraph);
 router.get("/:router", controller.index);
 
 module.exports = router;

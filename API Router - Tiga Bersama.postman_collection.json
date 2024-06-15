@@ -2334,7 +2334,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}top-interface/1?start_date=2024-06-01&end_date=2024-06-12",
+							"raw": "{{url}}top-interface/1",
 							"host": [
 								"{{url}}top-interface"
 							],
@@ -2344,17 +2344,64 @@
 							"query": [
 								{
 									"key": "start_date",
-									"value": "2024-06-01"
+									"value": "2024-06-01",
+									"disabled": true
 								},
 								{
 									"key": "end_date",
-									"value": "2024-06-12"
+									"value": "2024-06-16",
+									"disabled": true
 								},
 								{
 									"key": "date",
 									"value": "2024-06-12",
 									"disabled": true
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "graph",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}top-interface/graph/1",
+							"host": [
+								"{{url}}top-interface"
+							],
+							"path": [
+								"graph",
+								"1"
 							]
 						}
 					},

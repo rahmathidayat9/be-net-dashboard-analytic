@@ -65,7 +65,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE top_interfaces (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router int NOT NULL, name varchar(255) NOT NULL, rx_byte bigint, tx_byte bigint, date date NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE top_interfaces (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router int NOT NULL, name varchar(255) NOT NULL, rx_byte bigint, tx_byte bigint, date date NOT NULL, counter int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(

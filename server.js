@@ -33,6 +33,7 @@ const userRouter = require("./routes/user");
 const profileRoute = require("./routes/profile");
 const helper = require("./helpers");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
+const { getGraphTopInterfaceIo } = require("./controllers/topInterface.js");
 const { getCurrentTxRxIo } = require("./controllers/bandwith");
 const router = require("./routes/api");
 
@@ -440,86 +441,6 @@ clientSocket.on("ether1", (data) => {
 //   }
 // });
 
-// top host name
-// cron.schedule("*/3 * * * * *", async () => {
-//   try {
-//     const Client = require("ssh2").Client;
-
-//     let ips = await database.query("SELECT * FROM ip_addresses");
-
-//     ips = ips[0];
-
-//     ips.forEach((ip) => {
-//       const conn = new Client();
-
-//       conn
-//         .on("ready", async () => {
-//           conn.exec(`cat /var/www/html/${ip.ip}.json`, (err, stream) => {
-//             if (err) throw err;
-
-//             let dataBuffer = "";
-
-//             stream
-//               .on("close", async (code, signal) => {
-//                 var json = JSON.parse(dataBuffer);
-
-//                 let success = 0;
-
-//                 for (let i = 0; i < json.length; i++) {
-//                   if (json[i].activity.length > 0) {
-//                     let query = await database.query(`
-//                         SELECT * FROM top_sites_2 WHERE date::date = '${today}' AND site = '${json[i].activity}'
-//                         `);
-
-//                     if (query[0].length == 0) {
-//                       await database.query(
-//                         `
-//                               INSERT INTO top_sites_2(site, date, created_at) VALUES(
-//                                   '${json[i].activity}',
-//                                   '${today}',
-//                                   '${await helper.getFormatedTime("datetime")}'
-//                               ) RETURNING *
-//                             `
-//                       );
-//                     } else {
-//                       let count = query[0][0].count;
-
-//                       count = count + 1;
-
-//                       await database.query(
-//                         `UPDATE top_sites_2 SET count = ${count}, updated_at = now() WHERE id = '${query[0][0].id}'`
-//                       );
-//                     }
-
-//                     success = success + 1;
-//                   }
-//                 }
-
-//                 console.log(`router ${ip.ip} done, ${success} data created`);
-
-//                 conn.end();
-//               })
-//               .on("data", (data) => {
-//                 dataBuffer += data;
-//               })
-//               .stderr.on("data", (data) => {
-//                 console.error("STDERR: " + data);
-//               });
-//           });
-//         })
-//         .connect({
-//           host: "103.118.175.82",
-//           port: 2025,
-//           username: "analytic",
-//           password: "dashboardanalytic",
-//         });
-//     });
-
-//     console.log("top_host updated");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
 // top_host_names;
 cron.schedule("*/3 * * * * *", async () => {
   try {
@@ -635,7 +556,7 @@ cron.schedule("*/3 * * * * *", async () => {
 });
 
 // top interface
-cron.schedule("0 * * * *", async () => {
+cron.schedule("*/1 * * * * *", async () => {
   try {
     const today = moment().format("YYYY-MM-DD");
 
@@ -659,17 +580,28 @@ cron.schedule("0 * * * *", async () => {
             const data = response.data;
 
             for (let j = 0; j < data.length; j++) {
+              let counter = 1;
+
+              let latest = await database.query(`
+                SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
+              `);
+
+              if (latest[0].length == 1) {
+                counter = latest[0][0].counter + 1;
+              }
+
               await database.query(
                 `
-              INSERT INTO top_interfaces(router, name, rx_byte, tx_byte, date, created_at) VALUES(
-                  '${routers[i].id}',
-                  '${data[j].name}',
-                  '${data[j].rx_byte}',
-                  '${data[j].tx_byte}',
-                  '${today}',
-                  '${await helper.getFormatedTime("datetime")}'
-              ) RETURNING *
-            `
+                  INSERT INTO top_interfaces(router, name, rx_byte, tx_byte, date, counter, created_at) VALUES(
+                      '${routers[i].id}',
+                      '${data[j].name}',
+                      '${data[j].rx_byte}',
+                      '${data[j].tx_byte}',
+                      '${today}',
+                      '${counter}',
+                      '${await helper.getFormatedTime("datetime")}'
+                  ) RETURNING *
+                `
               );
             }
           })
@@ -826,6 +758,17 @@ io.on("connection", async (socket) => {
   socket.on("bandwith", async ({ router }) => {
     try {
       const data = await getCurrentTxRxIo({ router });
+
+      io.emit("new-data", data);
+    } catch (error) {
+      console.log(error);
+      io.emit("error", { message: error.message });
+    }
+  });
+
+  socket.on("top-interface-graph", async () => {
+    try {
+      const data = await getGraphTopInterfaceIo();
 
       io.emit("new-data", data);
     } catch (error) {

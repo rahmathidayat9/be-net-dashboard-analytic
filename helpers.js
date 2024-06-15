@@ -18,6 +18,12 @@ const formatBytes = (bytes) => {
   return `${value.toFixed(2)} ${sizes[i]}`;
 };
 
+const formatBytesnonSuffix = (bytes) => {
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
+  const value = bytes / Math.pow(1024, i);
+  return value.toFixed(2);
+};
+
 function generateDateArray(startDate, endDate) {
   const dateArray = [];
   const currentDate = new Date(startDate);
@@ -189,4 +195,5 @@ module.exports = {
   hashPassword,
   sendPostData,
   response,
+  formatBytesnonSuffix,
 };

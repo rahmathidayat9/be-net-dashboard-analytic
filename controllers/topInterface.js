@@ -62,13 +62,20 @@ module.exports = {
             AND date::date >= '${start_date}'::date AND router = '${router}' AND name = '${names[i]}' ORDER BY id DESC LIMIT 1
             `);
 
-          const rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
-          const tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+          const rx_byte =
+            highest[0][0].rx_byte !== lowest[0][0].rx_byte
+              ? highest[0][0].rx_byte - lowest[0][0].rx_byte
+              : highest[0][0].rx_byte;
+
+          const tx_byte =
+            highest[0][0].tx_byte !== lowest[0][0].tx_byte
+              ? highest[0][0].tx_byte - lowest[0][0].tx_byte
+              : highest[0][0].tx_byte;
 
           data.push({
             ethernet: names[i],
-            rx_byte: helper.formatBytes(rx_byte),
-            tx_byte: helper.formatBytes(tx_byte),
+            rx_byte: helper.formatBytesnonSuffix(parseFloat(rx_byte)),
+            tx_byte: helper.formatBytesnonSuffix(parseFloat(tx_byte)),
           });
         }
       } else {
@@ -99,13 +106,20 @@ module.exports = {
             SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${names[i]}' ORDER BY id DESC LIMIT 1
           `);
 
-          const rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
-          const tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+          const rx_byte =
+            highest[0][0].rx_byte !== lowest[0][0].rx_byte
+              ? highest[0][0].rx_byte - lowest[0][0].rx_byte
+              : highest[0][0].rx_byte;
+
+          const tx_byte =
+            highest[0][0].tx_byte !== lowest[0][0].tx_byte
+              ? highest[0][0].tx_byte - lowest[0][0].tx_byte
+              : highest[0][0].tx_byte;
 
           data.push({
             ethernet: names[i],
-            rx_byte: helper.formatBytes(rx_byte),
-            tx_byte: helper.formatBytes(tx_byte),
+            rx_byte: helper.formatBytesnonSuffix(parseFloat(rx_byte)),
+            tx_byte: helper.formatBytesnonSuffix(parseFloat(tx_byte)),
           });
         }
       }
@@ -116,6 +130,93 @@ module.exports = {
       });
     } catch (error) {
       return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+  // NOTE ambil data grafik
+  getGraph: async (req, res) => {
+    try {
+      let router = await database.query(`
+        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
+      `);
+
+      if (router[0].length == 0) {
+        return helper.response(res, 200, "No active router", data);
+      }
+
+      router = router[0][0];
+
+      let today = moment().format("YYYY-MM-DD");
+
+      let data = [];
+
+      const exists = await database.query(`
+        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
+      `);
+
+      if (exists[0].length == 0) {
+        return helper.response(res, 200, "No data", data);
+      }
+
+      for (i = 0; i < exists[0].length; i++) {
+        data.push({
+          created_at: exists[0][i].created_at,
+          rx_byte: helper.formatBytesnonSuffix(
+            parseFloat(exists[0][i].rx_byte)
+          ),
+          tx_byte: helper.formatBytesnonSuffix(
+            parseFloat(exists[0][i].tx_byte)
+          ),
+        });
+      }
+
+      return helper.response(res, 200, "Data ditemukan", {
+        today,
+        data,
+      });
+    } catch (error) {
+      return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+  // NOTE ambil data grafik io
+  getGraphTopInterfaceIo: async (req, res) => {
+    try {
+      let router = await database.query(`
+        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
+      `);
+
+      if (router[0].length == 0) {
+        return helper.response(res, 200, "No active router", data);
+      }
+
+      router = router[0][0];
+
+      let today = moment().format("YYYY-MM-DD");
+
+      let data = [];
+
+      const exists = await database.query(`
+        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
+      `);
+
+      if (exists[0].length == 0) {
+        return helper.response(res, 200, "No data", data);
+      }
+
+      for (i = 0; i < exists[0].length; i++) {
+        data.push({
+          created_at: exists[0][i].created_at,
+          rx_byte: helper.formatBytesnonSuffix(
+            parseFloat(exists[0][i].rx_byte)
+          ),
+          tx_byte: helper.formatBytesnonSuffix(
+            parseFloat(exists[0][i].tx_byte)
+          ),
+        });
+      }
+
+      return data;
+    } catch (error) {
+      return error;
     }
   },
 };
