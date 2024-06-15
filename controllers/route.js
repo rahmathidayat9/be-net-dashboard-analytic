@@ -34,6 +34,12 @@ module.exports = {
 
       await database.query(
         `
+          UPDATE routers SET status = 'deactive'
+        `
+      );
+
+      await database.query(
+        `
            UPDATE routers SET status = 'active' WHERE id = ${id}
           `
       );

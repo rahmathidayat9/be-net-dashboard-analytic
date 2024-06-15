@@ -34,6 +34,7 @@ const profileRoute = require("./routes/profile");
 const helper = require("./helpers");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
 const { getCurrentTxRxIo } = require("./controllers/bandwith");
+const router = require("./routes/api");
 
 require("dotenv").config();
 
@@ -778,8 +779,22 @@ io.on("connection", async (socket) => {
 
   app.get("/api/dashboard/start", async (req, res) => {
     if (!interfaceLive) {
-      interfaceLive = cron.schedule("* * * * * *", () => {
-        triggerSocket(io.sockets);
+      interfaceLive = cron.schedule("* * * * * *", async () => {
+        let router = await database.query(`
+          SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
+        `);
+
+        if (router.length == 1) {
+          router = router[0][0];
+
+          const id = router.id;
+
+          const systemResource = await getDataSystemResourceIo({ id });
+          const txRx = await getCurrentTxRxIo({ id });
+
+          io.emit("system-resource", systemResource);
+          io.emit("tx-rx", txRx);
+        }
       });
 
       res.send("start");
