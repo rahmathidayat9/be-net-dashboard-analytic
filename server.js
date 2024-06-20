@@ -35,6 +35,7 @@ const helper = require("./helpers");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
 const { getGraphTopInterfaceIo } = require("./controllers/topInterface.js");
 const { getCurrentTxRxIo } = require("./controllers/bandwith");
+const { getDHCPServersIo } = require("./controllers/misc");
 const router = require("./routes/api");
 
 require("dotenv").config();
@@ -173,306 +174,307 @@ clientSocket.on("ether1", (data) => {
   isProcessing = false;
 });
 
-// microtic_logs
-// cron.schedule("0 * * * *", async () => {
-//   try {
-//     const url =
-//       process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
+if (process.env.MODE == "production") {
+  // microtic_logs
+  // cron.schedule("0 * * * *", async () => {
+  //   try {
+  //     const url =
+  //       process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
 
-//     for (let i = 3; i < 7; i++) {
-//       const uuid = "mrtk-00000" + i;
+  //     for (let i = 3; i < 7; i++) {
+  //       const uuid = "mrtk-00000" + i;
 
-//       const params = {
-//         uuid,
-//       };
+  //       const params = {
+  //         uuid,
+  //       };
 
-//       const response = await axios.post(url, params);
-//       if (response.data.success) {
-//         const responseData = response.data.massage;
+  //       const response = await axios.post(url, params);
+  //       if (response.data.success) {
+  //         const responseData = response.data.massage;
 
-//         let arrData = [];
+  //         let arrData = [];
 
-//         const log = await database.query(`
-//           SELECT * FROM microtic_logs WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-//         `);
+  //         const log = await database.query(`
+  //           SELECT * FROM microtic_logs WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+  //         `);
 
-//         if (log[0].length == 0) {
-//           responseData.forEach(async (value) => {
-//             arrData.push(value);
+  //         if (log[0].length == 0) {
+  //           responseData.forEach(async (value) => {
+  //             arrData.push(value);
 
-//             await database.query(
-//               `
-//                   INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
-//                       '${uuid}',
-//                       '${value.name}',
-//                       '${value["tx-byte"]}',
-//                       '${value["rx-byte"]}',
-//                       1,
-//                       '${await helper.getFormatedTime("datetime")}'
-//                   ) RETURNING *
-//                 `
-//             );
-//           });
-//         } else {
-//           const order_number = log[0][0].order_number + 1;
+  //             await database.query(
+  //               `
+  //                   INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
+  //                       '${uuid}',
+  //                       '${value.name}',
+  //                       '${value["tx-byte"]}',
+  //                       '${value["rx-byte"]}',
+  //                       1,
+  //                       '${await helper.getFormatedTime("datetime")}'
+  //                   ) RETURNING *
+  //                 `
+  //             );
+  //           });
+  //         } else {
+  //           const order_number = log[0][0].order_number + 1;
 
-//           responseData.forEach(async (value) => {
-//             arrData.push(value);
+  //           responseData.forEach(async (value) => {
+  //             arrData.push(value);
 
-//             await database.query(
-//               `
-//                   INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
-//                       '${uuid}',
-//                       '${value.name}',
-//                       '${value["tx-byte"]}',
-//                       '${value["rx-byte"]}',
-//                       ${order_number},
-//                       '${await helper.getFormatedTime("datetime")}'
-//                   ) RETURNING *
-//                 `
-//             );
-//           });
-//         }
-//       }
-//     }
+  //             await database.query(
+  //               `
+  //                   INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
+  //                       '${uuid}',
+  //                       '${value.name}',
+  //                       '${value["tx-byte"]}',
+  //                       '${value["rx-byte"]}',
+  //                       ${order_number},
+  //                       '${await helper.getFormatedTime("datetime")}'
+  //                   ) RETURNING *
+  //                 `
+  //             );
+  //           });
+  //         }
+  //       }
+  //     }
 
-//     console.log("microtic_logs updated");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+  //     console.log("microtic_logs updated");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // });
 
-// traffic by port
-// cron.schedule("0 * * * *", async () => {
-//   try {
-//     let url = process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
+  // traffic by port
+  // cron.schedule("0 * * * *", async () => {
+  //   try {
+  //     let url = process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
 
-//     for (let i = 3; i < 7; i++) {
-//       const uuid = "mrtk-00000" + i;
+  //     for (let i = 3; i < 7; i++) {
+  //       const uuid = "mrtk-00000" + i;
 
-//       const params = {
-//         uuid,
-//       };
+  //       const params = {
+  //         uuid,
+  //       };
 
-//       let response = await axios.post(url, params);
+  //       let response = await axios.post(url, params);
 
-//       if (response.data.success) {
-//         const responseData = response.data.massage;
+  //       if (response.data.success) {
+  //         const responseData = response.data.massage;
 
-//         const log = await database.query(`
-//               SELECT * FROM traffic_by_ports WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-//             `);
+  //         const log = await database.query(`
+  //               SELECT * FROM traffic_by_ports WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+  //             `);
 
-//         if (log[0].length == 0) {
-//           responseData.forEach(async (value) => {
-//             await database.query(
-//               `
-//                 INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
-//                   '${uuid}',
-//                   '${value.name.replace("'", "")}',
-//                   '${value["rx-byte"]}',
-//                   '${value["tx-byte"]}',
-//                   '${value["mac-address"]}',
-//                   1,
-//                   '${await helper.getFormatedTime("datetime")}'
-//                 ) RETURNING *
-//               `
-//             );
-//           });
-//         } else {
-//           const order_number = log[0][0].order_number + 1;
+  //         if (log[0].length == 0) {
+  //           responseData.forEach(async (value) => {
+  //             await database.query(
+  //               `
+  //                 INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
+  //                   '${uuid}',
+  //                   '${value.name.replace("'", "")}',
+  //                   '${value["rx-byte"]}',
+  //                   '${value["tx-byte"]}',
+  //                   '${value["mac-address"]}',
+  //                   1,
+  //                   '${await helper.getFormatedTime("datetime")}'
+  //                 ) RETURNING *
+  //               `
+  //             );
+  //           });
+  //         } else {
+  //           const order_number = log[0][0].order_number + 1;
 
-//           responseData.forEach(async (value) => {
-//             await database.query(
-//               `
-//                 INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
-//                   '${uuid}',
-//                   '${value.name.replace("'", "")}',
-//                   '${value["rx-byte"]}',
-//                   '${value["tx-byte"]}',
-//                   '${value["mac-address"]}',
-//                   ${order_number},
-//                   '${await helper.getFormatedTime("datetime")}'
-//                 ) RETURNING *
-//               `
-//             );
-//           });
-//         }
-//       }
-//     }
+  //           responseData.forEach(async (value) => {
+  //             await database.query(
+  //               `
+  //                 INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
+  //                   '${uuid}',
+  //                   '${value.name.replace("'", "")}',
+  //                   '${value["rx-byte"]}',
+  //                   '${value["tx-byte"]}',
+  //                   '${value["mac-address"]}',
+  //                   ${order_number},
+  //                   '${await helper.getFormatedTime("datetime")}'
+  //                 ) RETURNING *
+  //               `
+  //             );
+  //           });
+  //         }
+  //       }
+  //     }
 
-//     console.log("top_host_name updated");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+  //     console.log("top_host_name updated");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // });
 
-// top host name
-// cron.schedule("0 * * * *", async () => {
-//   try {
-//     let url = process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
+  // top host name
+  // cron.schedule("0 * * * *", async () => {
+  //   try {
+  //     let url = process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
 
-//     for (let i = 3; i < 7; i++) {
-//       const uuid = "mrtk-00000" + i;
+  //     for (let i = 3; i < 7; i++) {
+  //       const uuid = "mrtk-00000" + i;
 
-//       const params = {
-//         uuid,
-//       };
+  //       const params = {
+  //         uuid,
+  //       };
 
-//       let response = await axios.post(url, params);
+  //       let response = await axios.post(url, params);
 
-//       if (response.data.success) {
-//         const responseData = response.data.massage;
+  //       if (response.data.success) {
+  //         const responseData = response.data.massage;
 
-//         let arrData = [];
+  //         let arrData = [];
 
-//         const log = await database.query(`
-//               SELECT * FROM top_host_names WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-//             `);
+  //         const log = await database.query(`
+  //               SELECT * FROM top_host_names WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+  //             `);
 
-//         if (log[0].length == 0) {
-//           responseData.forEach(async (value) => {
-//             arrData.push(value);
+  //         if (log[0].length == 0) {
+  //           responseData.forEach(async (value) => {
+  //             arrData.push(value);
 
-//             await database.query(
-//               `
-//                       INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
-//                           '${uuid}',
-//                           '${value.name.replace("'", "")}',
-//                           '${value["bytes-down"]}',
-//                           '${value["mac-address"]}',
-//                           1,
-//                           '${await helper.getFormatedTime("datetime")}'
-//                       ) RETURNING *
-//                     `
-//             );
-//           });
-//         } else {
-//           const order_number = log[0][0].order_number + 1;
+  //             await database.query(
+  //               `
+  //                       INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
+  //                           '${uuid}',
+  //                           '${value.name.replace("'", "")}',
+  //                           '${value["bytes-down"]}',
+  //                           '${value["mac-address"]}',
+  //                           1,
+  //                           '${await helper.getFormatedTime("datetime")}'
+  //                       ) RETURNING *
+  //                     `
+  //             );
+  //           });
+  //         } else {
+  //           const order_number = log[0][0].order_number + 1;
 
-//           responseData.forEach(async (value) => {
-//             arrData.push(value);
+  //           responseData.forEach(async (value) => {
+  //             arrData.push(value);
 
-//             await database.query(
-//               `
-//                     INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
-//                       '${uuid}',
-//                       '${value.name.replace("'", "")}',
-//                       '${value["bytes-down"]}',
-//                       '${value["mac-address"]}',
-//                           ${order_number},
-//                           '${await helper.getFormatedTime("datetime")}'
-//                       ) RETURNING *
-//                     `
-//             );
-//           });
-//         }
-//       }
-//     }
+  //             await database.query(
+  //               `
+  //                     INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
+  //                       '${uuid}',
+  //                       '${value.name.replace("'", "")}',
+  //                       '${value["bytes-down"]}',
+  //                       '${value["mac-address"]}',
+  //                           ${order_number},
+  //                           '${await helper.getFormatedTime("datetime")}'
+  //                       ) RETURNING *
+  //                     `
+  //             );
+  //           });
+  //         }
+  //       }
+  //     }
 
-//     console.log("top_host_name updated");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+  //     console.log("top_host_name updated");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // });
 
-// system resource
-// cron.schedule("0 * * * *", async () => {
-//   try {
-//     let url =
-//       process.env.MICROTIC_API_ENV + "api/router/system/resources/print";
+  // system resource
+  // cron.schedule("0 * * * *", async () => {
+  //   try {
+  //     let url =
+  //       process.env.MICROTIC_API_ENV + "api/router/system/resources/print";
 
-//     for (let i = 3; i < 7; i++) {
-//       const uuid = "mrtk-00000" + i;
+  //     for (let i = 3; i < 7; i++) {
+  //       const uuid = "mrtk-00000" + i;
 
-//       const params = {
-//         uuid,
-//       };
+  //       const params = {
+  //         uuid,
+  //       };
 
-//       let response = await axios.post(url, params);
+  //       let response = await axios.post(url, params);
 
-//       if (response.data.success) {
-//         const log = await database.query(`
-//               SELECT * FROM system_resources WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-//             `);
+  //       if (response.data.success) {
+  //         const log = await database.query(`
+  //               SELECT * FROM system_resources WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
+  //             `);
 
-//         const responseData = response.data.massage[0];
+  //         const responseData = response.data.massage[0];
 
-//         const totalMemory = responseData["total-memory"];
-//         const freeMemory = responseData["free-memory"];
+  //         const totalMemory = responseData["total-memory"];
+  //         const freeMemory = responseData["free-memory"];
 
-//         const memory_frequency =
-//           Math.ceil(((totalMemory - freeMemory) / freeMemory) * 100 * 100) /
-//           100;
+  //         const memory_frequency =
+  //           Math.ceil(((totalMemory - freeMemory) / freeMemory) * 100 * 100) /
+  //           100;
 
-//         if (log[0].length == 0) {
-//           await database.query(
-//             `
-//               INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
-//                   '${uuid}',
-//                   '${memory_frequency}',
-//                   '${responseData["cpu-load"]}',
-//                   1,
-//                   '${await helper.getFormatedTime("datetime")}'
-//               ) RETURNING *
-//             `
-//           );
-//         } else {
-//           const order_number = log[0][0].order_number + 1;
+  //         if (log[0].length == 0) {
+  //           await database.query(
+  //             `
+  //               INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
+  //                   '${uuid}',
+  //                   '${memory_frequency}',
+  //                   '${responseData["cpu-load"]}',
+  //                   1,
+  //                   '${await helper.getFormatedTime("datetime")}'
+  //               ) RETURNING *
+  //             `
+  //           );
+  //         } else {
+  //           const order_number = log[0][0].order_number + 1;
 
-//           await database.query(
-//             `
-//               INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
-//                   '${uuid}',
-//                   '${memory_frequency}',
-//                   '${responseData["cpu-load"]}',
-//                   ${order_number},
-//                   '${await helper.getFormatedTime("datetime")}'
-//               ) RETURNING *
-//             `
-//           );
-//         }
-//       }
-//     }
+  //           await database.query(
+  //             `
+  //               INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
+  //                   '${uuid}',
+  //                   '${memory_frequency}',
+  //                   '${responseData["cpu-load"]}',
+  //                   ${order_number},
+  //                   '${await helper.getFormatedTime("datetime")}'
+  //               ) RETURNING *
+  //             `
+  //           );
+  //         }
+  //       }
+  //     }
 
-//     console.log("top_host_name updated");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+  //     console.log("top_host_name updated");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // });
 
-// top_host_names;
-cron.schedule("*/3 * * * * *", async () => {
-  try {
-    const today = moment().format("YYYY-MM-DD");
+  // top_host_names;
+  cron.schedule("*/3 * * * * *", async () => {
+    try {
+      const today = moment().format("YYYY-MM-DD");
 
-    let routers = await database.query(`
+      let routers = await database.query(`
    SELECT * FROM routers WHERE deleted_at IS NULL
   `);
 
-    if (routers[0].length > 0) {
-      routers = routers[0];
+      if (routers[0].length > 0) {
+        routers = routers[0];
 
-      for (let i = 0; i < routers.length; i++) {
-        const url = `${process.env.MICROTIC_API_ENV}top-host-name/${routers[i].id}`;
+        for (let i = 0; i < routers.length; i++) {
+          const url = `${process.env.MICROTIC_API_ENV}top-host-name/${routers[i].id}`;
 
-        axios
-          .get(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then(async (response) => {
-            const data = response.data;
+          axios
+            .get(url, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+            .then(async (response) => {
+              const data = response.data;
 
-            for (let j = 0; j < data.length; j++) {
-              const log = await database.query(`
+              for (let j = 0; j < data.length; j++) {
+                const log = await database.query(`
               SELECT * FROM top_host_names WHERE identifier = '${data[j].id}'
             `);
 
-              if (log[0].length == 0) {
-                await database.query(
-                  `
+                if (log[0].length == 0) {
+                  await database.query(
+                    `
                   INSERT INTO top_host_names(identifier, bytes_down, date, host_name, router, created_at) VALUES(
                       '${data[j].id}',
                       '${data[j].bytes_down}',
@@ -482,54 +484,54 @@ cron.schedule("*/3 * * * * *", async () => {
                       '${await helper.getFormatedTime("datetime")}'
                   ) RETURNING *
                 `
-                );
+                  );
+                }
               }
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
       }
+
+      console.log("top host name updated");
+    } catch (error) {
+      console.log(error);
     }
+  });
 
-    console.log("top host name updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
+  // top_sites
+  cron.schedule("*/3 * * * * *", async () => {
+    try {
+      const today = moment().format("YYYY-MM-DD");
 
-// top_sites
-cron.schedule("*/3 * * * * *", async () => {
-  try {
-    const today = moment().format("YYYY-MM-DD");
-
-    let routers = await database.query(`
+      let routers = await database.query(`
    SELECT * FROM routers WHERE deleted_at IS NULL
   `);
 
-    if (routers[0].length > 0) {
-      routers = routers[0];
+      if (routers[0].length > 0) {
+        routers = routers[0];
 
-      for (let i = 0; i < routers.length; i++) {
-        const url = `${process.env.MICROTIC_API_ENV}top-sites/${routers[i].id}`;
+        for (let i = 0; i < routers.length; i++) {
+          const url = `${process.env.MICROTIC_API_ENV}top-sites/${routers[i].id}`;
 
-        axios
-          .get(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then(async (response) => {
-            const data = response.data;
+          axios
+            .get(url, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+            .then(async (response) => {
+              const data = response.data;
 
-            for (let j = 0; j < data.length; j++) {
-              const log = await database.query(`
+              for (let j = 0; j < data.length; j++) {
+                const log = await database.query(`
               SELECT * FROM top_sites WHERE identifier = '${data[j].id}'
             `);
 
-              if (log[0].length == 0) {
-                await database.query(
-                  `
+                if (log[0].length == 0) {
+                  await database.query(
+                    `
                   INSERT INTO top_sites(identifier, date, name, router, activity, created_at) VALUES(
                       '${data[j].id}',
                       '${today}',
@@ -539,59 +541,59 @@ cron.schedule("*/3 * * * * *", async () => {
                       '${await helper.getFormatedTime("datetime")}'
                   ) RETURNING *
                 `
-                );
+                  );
+                }
               }
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
       }
+
+      console.log("top host name updated");
+    } catch (error) {
+      console.log(error);
     }
+  });
 
-    console.log("top host name updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
+  // top interface
+  cron.schedule("*/1 * * * * *", async () => {
+    try {
+      const today = moment().format("YYYY-MM-DD");
 
-// top interface
-cron.schedule("*/1 * * * * *", async () => {
-  try {
-    const today = moment().format("YYYY-MM-DD");
-
-    let routers = await database.query(`
+      let routers = await database.query(`
       SELECT * FROM routers WHERE deleted_at IS NULL
     `);
 
-    if (routers[0].length > 0) {
-      routers = routers[0];
+      if (routers[0].length > 0) {
+        routers = routers[0];
 
-      for (let i = 0; i < routers.length; i++) {
-        const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
+        for (let i = 0; i < routers.length; i++) {
+          const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
 
-        axios
-          .get(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then(async (response) => {
-            const data = response.data;
+          axios
+            .get(url, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+            .then(async (response) => {
+              const data = response.data;
 
-            for (let j = 0; j < data.length; j++) {
-              let counter = 1;
+              for (let j = 0; j < data.length; j++) {
+                let counter = 1;
 
-              let latest = await database.query(`
+                let latest = await database.query(`
                 SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
               `);
 
-              if (latest[0].length == 1) {
-                counter = latest[0][0].counter + 1;
-              }
+                if (latest[0].length == 1) {
+                  counter = latest[0][0].counter + 1;
+                }
 
-              await database.query(
-                `
+                await database.query(
+                  `
                   INSERT INTO top_interfaces(router, name, rx_byte, tx_byte, date, counter, created_at) VALUES(
                       '${routers[i].id}',
                       '${data[j].name}',
@@ -602,47 +604,47 @@ cron.schedule("*/1 * * * * *", async () => {
                       '${await helper.getFormatedTime("datetime")}'
                   ) RETURNING *
                 `
-              );
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
       }
+
+      console.log("top interface updated");
+    } catch (error) {
+      console.log(error);
     }
+  });
 
-    console.log("top interface updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
+  // system resource
+  cron.schedule("0 * * * *", async () => {
+    try {
+      const today = moment().format("YYYY-MM-DD");
 
-// system resource
-cron.schedule("0 * * * *", async () => {
-  try {
-    const today = moment().format("YYYY-MM-DD");
-
-    let routers = await database.query(`
+      let routers = await database.query(`
       SELECT * FROM routers WHERE deleted_at IS NULL
     `);
 
-    if (routers[0].length > 0) {
-      routers = routers[0];
+      if (routers[0].length > 0) {
+        routers = routers[0];
 
-      for (let i = 0; i < routers.length; i++) {
-        const url = `${process.env.MICROTIC_API_ENV}system/resources/${routers[i].id}`;
+        for (let i = 0; i < routers.length; i++) {
+          const url = `${process.env.MICROTIC_API_ENV}system/resources/${routers[i].id}`;
 
-        axios
-          .get(url, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then(async (response) => {
-            const data = response.data;
+          axios
+            .get(url, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+            .then(async (response) => {
+              const data = response.data;
 
-            await database.query(
-              `
+              await database.query(
+                `
             INSERT INTO system_resources(router, cpu, hdd, memory, date, created_at) VALUES(
                 '${routers[i].id}',
                 '${data.cpu}',
@@ -652,19 +654,20 @@ cron.schedule("0 * * * *", async () => {
                 '${await helper.getFormatedTime("datetime")}'
             ) RETURNING *
           `
-            );
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
+              );
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
       }
-    }
 
-    console.log("system resource updated");
-  } catch (error) {
-    console.log(error);
-  }
-});
+      console.log("system resource updated");
+    } catch (error) {
+      console.log(error);
+    }
+  });
+}
 
 async function triggerSocket(socket) {
   const storedData = JSON.parse(localStorage.getItem("dataInterface"));
@@ -752,6 +755,17 @@ io.on("connection", async (socket) => {
       io.emit("new-data", data);
     } catch (error) {
       console.log(error);
+    }
+  });
+
+  socket.on("dhcp-servers", async ({ router }) => {
+    try {
+      const data = await getDHCPServersIo({ router });
+
+      io.emit("new-data", data);
+    } catch (error) {
+      console.log(error);
+      io.emit("error", { message: error.message });
     }
   });
 
