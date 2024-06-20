@@ -58,8 +58,8 @@ module.exports = {
 
         data = {
           ethernet,
-          rx_byte: helper.formatBytes(rx_byte),
-          tx_byte: helper.formatBytes(tx_byte),
+          rx_byte: helper.formatBytesnonSuffix(rx_byte),
+          tx_byte: helper.formatBytesnonSuffix(tx_byte),
         };
       } else {
         const exists = await database.query(`
@@ -83,8 +83,8 @@ module.exports = {
 
         data = {
           ethernet,
-          rx_byte: helper.formatBytes(rx_byte),
-          tx_byte: helper.formatBytes(tx_byte),
+          rx_byte: helper.formatBytesnonSuffix(rx_byte),
+          tx_byte: helper.formatBytesnonSuffix(tx_byte),
         };
       }
 
@@ -121,8 +121,8 @@ module.exports = {
       for (let j = 0; j < data.length; j++) {
         if (data[j].name == ethernet) {
           result = {
-            rx_byte: helper.formatBytes(data[j].rx_byte),
-            tx_byte: helper.formatBytes(data[j].tx_byte),
+            rx_byte: helper.formatBytesnonSuffix(data[j].rx_byte),
+            tx_byte: helper.formatBytesnonSuffix(data[j].tx_byte),
           };
 
           return result;

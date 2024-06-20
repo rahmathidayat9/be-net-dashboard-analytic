@@ -64,7 +64,7 @@ module.exports = {
           data.push({
             host_name: host_name[i],
             total: query[0].length,
-            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+            byte_down: helper.formatBytesnonSuffix(countByte[0][0].byte_down),
           });
         }
       } else {
@@ -98,7 +98,7 @@ module.exports = {
           data.push({
             host_name: host_name[i],
             total: query[0].length,
-            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+            byte_down: helper.formatBytesnonSuffix(countByte[0][0].byte_down),
           });
         }
       }
@@ -287,7 +287,7 @@ module.exports = {
           data.push({
             host_name: host_name[i],
             total: query[0].length,
-            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+            byte_down: helper.formatBytesnonSuffix(countByte[0][0].byte_down),
           });
         }
       } else {
@@ -321,7 +321,7 @@ module.exports = {
           data.push({
             host_name: host_name[i],
             total: query[0].length,
-            byte_down: helper.formatBytes(countByte[0][0].byte_down),
+            byte_down: helper.formatBytesnonSuffix(countByte[0][0].byte_down),
           });
         }
       }
