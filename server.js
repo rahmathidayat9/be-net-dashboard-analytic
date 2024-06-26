@@ -95,21 +95,21 @@ const upload = multer({ storage: storage });
 // Middleware for handling form-data
 app.use(upload.any());
 app.use(apiRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/priority", priorityRouter);
-app.use("/api/ticket", ticketRouter);
-app.use("/api", microticLogRouter);
-app.use("/api/bandwith", bandwithRouter);
-app.use("/api/internet", internetRouter);
-app.use("/api/ip-address", ipAddressRouter);
-app.use("/api/route", routeRouter);
-app.use("/api/top-host-name", topHostNameRouter);
-app.use("/api/top-interface", topInterfaceRouter);
-app.use("/api/top-sites", topSiteRouter);
-app.use("/api/traffic-by-port", trafficByPortRouter);
-app.use("/api/system-resource", systemResourceRouter);
-app.use("/api/users", userRouter);
-app.use("/api/profile1", profileRoute);
+app.use("/api/express/auth", authRouter);
+app.use("/api/express/priority", priorityRouter);
+app.use("/api/express/ticket", ticketRouter);
+app.use("/api/express/", microticLogRouter);
+app.use("/api/express/bandwith", bandwithRouter);
+app.use("/api/express/internet", internetRouter);
+app.use("/api/express/ip-address", ipAddressRouter);
+app.use("/api/express/route", routeRouter);
+app.use("/api/express/top-host-name", topHostNameRouter);
+app.use("/api/express/top-interface", topInterfaceRouter);
+app.use("/api/express/top-sites", topSiteRouter);
+app.use("/api/express/traffic-by-port", trafficByPortRouter);
+app.use("/api/express/system-resource", systemResourceRouter);
+app.use("/api/express/users", userRouter);
+app.use("/api/express/profile1", profileRoute);
 
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;

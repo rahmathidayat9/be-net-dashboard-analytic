@@ -2,7 +2,7 @@ const express = require("express");
 const helpers = require("../helpers");
 const axios = require("axios");
 const bcrypt = require("bcrypt");
-const database = require('../config/database')
+const database = require("../config/database");
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -11,21 +11,21 @@ router.get("/", (req, res) => {
 
 function getCurrentDateTime() {
   const now = new Date();
-  
+
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-  const day = String(now.getDate()).padStart(2, '0');
-  
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const day = String(now.getDate()).padStart(2, "0");
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
   const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  
+
   return dateTimeString;
 }
 
-router.get("/api/dashboard/status-router", async (req, res) => {
+router.get("/api/express/dashboard/status-router", async (req, res) => {
   try {
     const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
     const url = "/router/device/status";
@@ -45,7 +45,7 @@ router.get("/api/dashboard/status-router", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-router", async (req, res) => {
+router.get("/api/express/dashboard/get-router", async (req, res) => {
   try {
     const data = await helpers.sendPostData("/router/list");
 
@@ -56,12 +56,13 @@ router.get("/api/dashboard/get-router", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-internet", async (req, res) => {
+router.get("/api/express/dashboard/get-internet", async (req, res) => {
   try {
-    const uuid = req.query.uuid
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api/router/interface/list/print";
+    const uuid = req.query.uuid;
+    const apiUrl =
+      "https://api-mikrotik.linkdemo.web.id/api/express/router/interface/list/print";
     const params = {
-      "uuid": uuid,
+      uuid: uuid,
     };
 
     const response = await axios.post(apiUrl, params);
@@ -71,9 +72,9 @@ router.get("/api/dashboard/get-internet", async (req, res) => {
     console.log(error);
     return res.status(500).json({ error: "An error occurred" });
   }
-})
+});
 
-router.post("/api/dashboard/add-router", async (req, res) => {
+router.post("/api/express/dashboard/add-router", async (req, res) => {
   try {
     let uuid = req.body.uuid;
     let name = req.body.name;
@@ -104,7 +105,7 @@ router.post("/api/dashboard/add-router", async (req, res) => {
   }
 });
 
-router.post("/api/dashboard/remove-router/:uuid", async (req, res) => {
+router.post("/api/express/dashboard/remove-router/:uuid", async (req, res) => {
   try {
     const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
     const url = "/router/remove";
@@ -121,7 +122,7 @@ router.post("/api/dashboard/remove-router/:uuid", async (req, res) => {
   }
 });
 
-router.post("/api/dashboard/update-router", async (req, res) => {
+router.post("/api/express/dashboard/update-router", async (req, res) => {
   try {
     let uuid = req.body.uuid;
     let name = req.body.name;
@@ -152,7 +153,7 @@ router.post("/api/dashboard/update-router", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-system", async (req, res) => {
+router.get("/api/express/dashboard/get-system", async (req, res) => {
   try {
     const data = await helpers.sendPostData("/router/system/resources/print", {
       uuid: req.query.uuid,
@@ -179,7 +180,7 @@ router.get("/api/dashboard/get-system", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-hotspot-active", async (req, res) => {
+router.get("/api/express/dashboard/get-hotspot-active", async (req, res) => {
   try {
     const data = await helpers.sendPostData(
       "/router/device/hotspot/active/print",
@@ -195,7 +196,7 @@ router.get("/api/dashboard/get-hotspot-active", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-dhcp-server", async (req, res) => {
+router.get("/api/express/dashboard/get-dhcp-server", async (req, res) => {
   try {
     const data = await helpers.sendPostData("/router/ip/dhcp-server/print", {
       uuid: req.query.uuid,
@@ -208,7 +209,7 @@ router.get("/api/dashboard/get-dhcp-server", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-kid-control", async (req, res) => {
+router.get("/api/express/dashboard/get-kid-control", async (req, res) => {
   try {
     const data = await helpers.sendPostData("/router/ip/kid-controll/print", {
       uuid: req.query.uuid,
@@ -221,7 +222,7 @@ router.get("/api/dashboard/get-kid-control", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/get-interface", async (req, res) => {
+router.get("/api/express/dashboard/get-interface", async (req, res) => {
   try {
     const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
     const url = "/router/interface/list/print";
@@ -248,161 +249,179 @@ router.get("/api/dashboard/get-interface", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/interface-monitor-live", async (req, res) => {
-  try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+router.get(
+  "/api/express/dashboard/interface-monitor-live",
+  async (req, res) => {
+    try {
+      const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
 
-    /* Get all interface dynamicaly of the uuid device before live monitoring */
-    const interfaceUrl = "/router/interface/list/print";
-    const interfaceParams = {
-      uuid: req.query.uuid,
-    };
+      /* Get all interface dynamicaly of the uuid device before live monitoring */
+      const interfaceUrl = "/router/interface/list/print";
+      const interfaceParams = {
+        uuid: req.query.uuid,
+      };
 
-    const interfaceResponse = await axios.post(
-      apiUrl + interfaceUrl,
-      interfaceParams
-    );
-    const interfaceResponseData = interfaceResponse.data.massage;
+      const interfaceResponse = await axios.post(
+        apiUrl + interfaceUrl,
+        interfaceParams
+      );
+      const interfaceResponseData = interfaceResponse.data.massage;
 
-    let arrData = [];
+      let arrData = [];
 
-    interfaceResponseData.forEach((value, index) => {
-      arrData.push(value.name);
-    });
-    /**/
+      interfaceResponseData.forEach((value, index) => {
+        arrData.push(value.name);
+      });
+      /**/
 
-    const url = "/router/interface/list/monitor/live";
+      const url = "/router/interface/list/monitor/live";
 
-    const params = {
-      uuid: req.query.uuid,
-      ethernet: arrData,
-    };
+      const params = {
+        uuid: req.query.uuid,
+        ethernet: arrData,
+      };
 
-    const response = await axios.post(apiUrl + url, params);
+      const response = await axios.post(apiUrl + url, params);
 
-    let data = response.data;
-    data.total = arrData.length;
-    data.interface = arrData;
+      let data = response.data;
+      data.total = arrData.length;
+      data.interface = arrData;
 
-    return res.status(200).json(data);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
+      return res.status(200).json(data);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: "An error occurred" });
+    }
   }
-});
+);
 
-router.get("/api/dashboard/interface-monitor-stop", async (req, res) => {
-  try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+router.get(
+  "/api/express/dashboard/interface-monitor-stop",
+  async (req, res) => {
+    try {
+      const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
 
-    /* Get all interface dynamicaly of the uuid device before stop live monitoring */
-    const interfaceUrl = "/router/interface/list/print";
-    const interfaceParams = {
-      uuid: req.query.uuid,
-    };
+      /* Get all interface dynamicaly of the uuid device before stop live monitoring */
+      const interfaceUrl = "/router/interface/list/print";
+      const interfaceParams = {
+        uuid: req.query.uuid,
+      };
 
-    const interfaceResponse = await axios.post(
-      apiUrl + interfaceUrl,
-      interfaceParams
-    );
-    const interfaceResponseData = interfaceResponse.data.massage;
+      const interfaceResponse = await axios.post(
+        apiUrl + interfaceUrl,
+        interfaceParams
+      );
+      const interfaceResponseData = interfaceResponse.data.massage;
 
-    let arrData = [];
+      let arrData = [];
 
-    interfaceResponseData.forEach((value, index) => {
-      arrData.push(value.name);
-    });
-    /**/
+      interfaceResponseData.forEach((value, index) => {
+        arrData.push(value.name);
+      });
+      /**/
 
-    const url = "/router/interface/list/monitor/stop";
+      const url = "/router/interface/list/monitor/stop";
 
-    const params = {
-      uuid: req.query.uuid,
-      ethernet: arrData,
-    };
+      const params = {
+        uuid: req.query.uuid,
+        ethernet: arrData,
+      };
 
-    const response = await axios.post(apiUrl + url, params);
+      const response = await axios.post(apiUrl + url, params);
 
-    return res.status(200).json(response.data);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
+      return res.status(200).json(response.data);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: "An error occurred" });
+    }
   }
-});
+);
 
-router.get("/api/dashboard/interface-monitor-log-add", async (req, res) => {
-  try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
-    const url = "/router/interface/list/monitor/log/add";
-    const params = {
-      uuid: "mrtk-000002",
-      ethernet: ["ether1", "ether2", "ether3", "ether4"],
-    };
+router.get(
+  "/api/express/dashboard/interface-monitor-log-add",
+  async (req, res) => {
+    try {
+      const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+      const url = "/router/interface/list/monitor/log/add";
+      const params = {
+        uuid: "mrtk-000002",
+        ethernet: ["ether1", "ether2", "ether3", "ether4"],
+      };
 
-    const response = await axios.post(apiUrl + url, params);
+      const response = await axios.post(apiUrl + url, params);
 
-    return res.status(200).json(response.data);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
+      return res.status(200).json(response.data);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: "An error occurred" });
+    }
   }
-});
+);
 
-router.get("/api/dashboard/interface-monitor-log-list", async (req, res) => {
-  try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
-    const url = "/router/interface/list/monitor/log/list";
-    const params = {
-      uuid: "mrtk-000002",
-      ethernet: ["ether1", "ether2", "ether3", "ether4"],
-    };
+router.get(
+  "/api/express/dashboard/interface-monitor-log-list",
+  async (req, res) => {
+    try {
+      const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+      const url = "/router/interface/list/monitor/log/list";
+      const params = {
+        uuid: "mrtk-000002",
+        ethernet: ["ether1", "ether2", "ether3", "ether4"],
+      };
 
-    const response = await axios.post(apiUrl + url, params);
+      const response = await axios.post(apiUrl + url, params);
 
-    return res.status(200).json(response.data);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
+      return res.status(200).json(response.data);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: "An error occurred" });
+    }
   }
-});
+);
 
-router.get("/api/dashboard/interface-monitor-log-delete", async (req, res) => {
-  try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
-    const url = "/router/interface/list/monitor/log/delete";
-    const params = {
-      uuid: "mrtk-000002",
-      ethernet: ["ether1", "ether2", "ether3", "ether4"],
-    };
+router.get(
+  "/api/express/dashboard/interface-monitor-log-delete",
+  async (req, res) => {
+    try {
+      const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+      const url = "/router/interface/list/monitor/log/delete";
+      const params = {
+        uuid: "mrtk-000002",
+        ethernet: ["ether1", "ether2", "ether3", "ether4"],
+      };
 
-    const response = await axios.post(apiUrl + url, params);
+      const response = await axios.post(apiUrl + url, params);
 
-    return res.status(200).json(response.data);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
+      return res.status(200).json(response.data);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: "An error occurred" });
+    }
   }
-});
+);
 
-router.get("/api/dashboard/interface-monitor-log-stop", async (req, res) => {
-  try {
-    const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
-    const url = "/router/interface/list/monitor/stop";
-    const params = {
-      uuid: "mrtk-000002",
-      ethernet: ["ether1", "ether2", "ether3", "ether4"],
-    };
+router.get(
+  "/api/express/dashboard/interface-monitor-log-stop",
+  async (req, res) => {
+    try {
+      const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
+      const url = "/router/interface/list/monitor/stop";
+      const params = {
+        uuid: "mrtk-000002",
+        ethernet: ["ether1", "ether2", "ether3", "ether4"],
+      };
 
-    const response = await axios.post(apiUrl + url, params);
+      const response = await axios.post(apiUrl + url, params);
 
-    return res.status(200).json(response.data);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
+      return res.status(200).json(response.data);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: "An error occurred" });
+    }
   }
-});
+);
 
-router.get("/api/dashboard/logs-print", async (req, res) => {
+router.get("/api/express/dashboard/logs-print", async (req, res) => {
   try {
     const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
     const url = "/router/logs/print";
@@ -422,7 +441,7 @@ router.get("/api/dashboard/logs-print", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/logs-list", async (req, res) => {
+router.get("/api/express/dashboard/logs-list", async (req, res) => {
   try {
     const apiUrl = "https://api-mikrotik.linkdemo.web.id/api";
     const url = "/router/logs/list";
@@ -436,7 +455,7 @@ router.get("/api/dashboard/logs-list", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard/logs-sites", async (req, res) => {
+router.get("/api/express/dashboard/logs-sites", async (req, res) => {
   try {
     const url = "http://103.16.117.62/logs/page?page=1&limit=10";
 
@@ -451,9 +470,9 @@ router.get("/api/dashboard/logs-sites", async (req, res) => {
 });
 
 /* User Management Module  */
-router.get("/api/dashboard/list-users", async (req, res) => {
+router.get("/api/express/dashboard/list-users", async (req, res) => {
   let query = `SELECT * FROM users`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data listed successfully",
@@ -462,17 +481,17 @@ router.get("/api/dashboard/list-users", async (req, res) => {
   });
 });
 
-router.post("/api/dashboard/create-users", async (req, res) => {
+router.post("/api/express/dashboard/create-users", async (req, res) => {
   let username = req.body.username;
   let name = req.body.name;
   let password = await bcrypt.hash(req.body.password, 10);
   let role = req.body.role_id;
-  let email = name+"@gmail.com"
+  let email = name + "@gmail.com";
   let created_at = getCurrentDateTime();
 
   let query = `INSERT INTO users (username, name, email, password, role, created_at) 
         VALUES ('${username}', '${name}', '${email}', '${password}', '${role}', '${created_at}')`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data saved successfully",
@@ -480,10 +499,10 @@ router.post("/api/dashboard/create-users", async (req, res) => {
     success: true,
   });
 });
-router.get("/api/dashboard/edit-users/:id", async (req, res) => {
+router.get("/api/express/dashboard/edit-users/:id", async (req, res) => {
   let id = req.params.id;
   let query = `SELECT * FROM users WHERE id='${id}'`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data edit successfully",
@@ -492,10 +511,10 @@ router.get("/api/dashboard/edit-users/:id", async (req, res) => {
   });
 });
 
-router.post("/api/dashboard/update-users/:id", async (req, res) => {
+router.post("/api/express/dashboard/update-users/:id", async (req, res) => {
   let id = req.params.id;
   let query_find_user = `SELECT * FROM users WHERE id='${id}'`;
-  let data_find_user = await database.query(query_find_user)
+  let data_find_user = await database.query(query_find_user);
 
   let username = req.body.username;
   let full_name = req.body.name;
@@ -509,7 +528,7 @@ router.post("/api/dashboard/update-users/:id", async (req, res) => {
 
   let query = `UPDATE users SET username='${username}', name='${full_name}', password='${password}'
         WHERE id=${id}`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data update successfully",
@@ -518,10 +537,10 @@ router.post("/api/dashboard/update-users/:id", async (req, res) => {
   });
 });
 
-router.post("/api/dashboard/delete-users/:id", async (req, res) => {
+router.post("/api/express/dashboard/delete-users/:id", async (req, res) => {
   let id = req.params.id;
   let query = `DELETE FROM users WHERE id=${id}`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data deleted successfully",
@@ -531,9 +550,9 @@ router.post("/api/dashboard/delete-users/:id", async (req, res) => {
 });
 
 /* Helpdesk Module  */
-router.get("/api/dashboard/list-helpdesk", async (req, res) => {
+router.get("/api/express/dashboard/list-helpdesk", async (req, res) => {
   let query = `SELECT * FROM helpdesk JOIN users ON helpdesk.request_by=users.id`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   let query_count = `SELECT
         COUNT(*) AS total,
@@ -543,7 +562,7 @@ router.get("/api/dashboard/list-helpdesk", async (req, res) => {
     FROM
         helpdesk`;
 
-  let data_count = await database.query(query_count)
+  let data_count = await database.query(query_count);
 
   console.log(data);
   res.send({
@@ -559,15 +578,18 @@ router.get("/api/dashboard/list-helpdesk", async (req, res) => {
   });
 });
 
-router.get("/api/dashboard/generate-helpdesk-ticket", async (req, res) => {
-  let ticket = await helpers.generateTicketNumber();
+router.get(
+  "/api/express/dashboard/generate-helpdesk-ticket",
+  async (req, res) => {
+    let ticket = await helpers.generateTicketNumber();
 
-  res.send({
-    data: ticket,
-  });
-});
+    res.send({
+      data: ticket,
+    });
+  }
+);
 
-router.post("/api/dashboard/create-helpdesk", async (req, res) => {
+router.post("/api/express/dashboard/create-helpdesk", async (req, res) => {
   let user_id = req.body.user_id;
   let description = req.body.detail;
   let due_date = req.body.due_date;
@@ -582,7 +604,7 @@ router.post("/api/dashboard/create-helpdesk", async (req, res) => {
   });
 });
 
-router.post("/api/dashboard/update-helpdesk/:id", async (req, res) => {
+router.post("/api/express/dashboard/update-helpdesk/:id", async (req, res) => {
   let id = req.params.id;
   let description = req.body.description;
   let status = req.body.status;
@@ -590,7 +612,7 @@ router.post("/api/dashboard/update-helpdesk/:id", async (req, res) => {
 
   let query = `UPDATE helpdesk SET description='${description}', status='${status}', notes='${notes}'
         WHERE ticket_number=${id}`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data update successfully",
@@ -599,10 +621,10 @@ router.post("/api/dashboard/update-helpdesk/:id", async (req, res) => {
   });
 });
 
-router.post("/api/dashboard/delete-helpdesk", async (req, res) => {
+router.post("/api/express/dashboard/delete-helpdesk", async (req, res) => {
   let code = req.body.code;
   let query = `DELETE FROM helpdesk WHERE code='${code}'`;
-  let data = await database.query(query)
+  let data = await database.query(query);
 
   res.send({
     message: "Data deleted successfully",
