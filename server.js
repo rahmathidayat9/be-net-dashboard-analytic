@@ -36,7 +36,6 @@ const { getDataSystemResourceIo } = require("./controllers/systemResource");
 const { getGraphTopInterfaceIo } = require("./controllers/topInterface.js");
 const { getCurrentTxRxIo } = require("./controllers/bandwith");
 const { getDHCPServersIo } = require("./controllers/misc");
-const router = require("./routes/api");
 
 require("dotenv").config();
 
@@ -100,13 +99,13 @@ app.use("/api/express/priority", priorityRouter);
 app.use("/api/express/ticket", ticketRouter);
 app.use("/api/express/", microticLogRouter);
 app.use("/api/express/bandwith", bandwithRouter);
-app.use("/api/express/internet", internetRouter);
-app.use("/api/express/ip-address", ipAddressRouter);
+// app.use("/api/express/internet", internetRouter);
+// app.use("/api/express/ip-address", ipAddressRouter);
 app.use("/api/express/route", routeRouter);
 app.use("/api/express/top-host-name", topHostNameRouter);
 app.use("/api/express/top-interface", topInterfaceRouter);
 app.use("/api/express/top-sites", topSiteRouter);
-app.use("/api/express/traffic-by-port", trafficByPortRouter);
+// app.use("/api/express/traffic-by-port", trafficByPortRouter);
 app.use("/api/express/system-resource", systemResourceRouter);
 app.use("/api/express/users", userRouter);
 app.use("/api/express/profile1", profileRoute);

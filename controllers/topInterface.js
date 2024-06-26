@@ -198,10 +198,6 @@ module.exports = {
         SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
       `);
 
-      if (exists[0].length == 0) {
-        return helper.response(res, 200, "No data", data);
-      }
-
       for (i = 0; i < exists[0].length; i++) {
         data.push({
           created_at: exists[0][i].created_at,

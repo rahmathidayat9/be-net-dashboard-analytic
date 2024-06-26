@@ -13,12 +13,12 @@
     referrerpolicy="no-referrer"
   ></script>
   <script>
-    var socket = io("http://localhost:3000");
+    var socket = io("http://191.101.190.202:81");
 
     socket.on("connect", () => {
       console.log("connected to server");
 
-      socket.emit("dhcp-servers", { router: "1" });
+      socket.emit("top-interface-graph", { router: "1" });
       // socket.emit("top-interface-graph");
     });
 
