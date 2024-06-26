@@ -11,8 +11,8 @@ const { Server } = require("socket.io");
 const ioClient = require("socket.io-client");
 const cron = require("node-cron");
 const axios = require("axios");
-const { Telegraf } = require("telegraf");
-const Telegram = require("telegraf/telegram");
+// const { Telegraf } = require("telegraf");
+// const Telegram = require("telegraf/telegram");
 const LocalStorage = require("node-localstorage").LocalStorage;
 const localStorage = new LocalStorage("./scratch");
 const apiRouter = require("./routes/api");
@@ -29,6 +29,7 @@ const topHostNameRouter = require("./routes/topHostName");
 const topSiteRouter = require("./routes/topSite");
 const topInterfaceRouter = require("./routes/topInterface");
 const trafficByPortRouter = require("./routes/trafficByPort");
+const cronRouter = require("./routes/cron");
 const userRouter = require("./routes/user");
 const profileRoute = require("./routes/profile");
 const helper = require("./helpers");
@@ -49,8 +50,8 @@ const io = new Server(server, {
   },
 });
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
-const telegram = new Telegram(process.env.BOT_TOKEN);
+// const bot = new Telegraf(process.env.BOT_TOKEN);
+// const telegram = new Telegram(process.env.BOT_TOKEN);
 
 const groupIds = ["-4010824640", "-4084355967"];
 
@@ -94,6 +95,7 @@ const upload = multer({ storage: storage });
 // Middleware for handling form-data
 app.use(upload.any());
 app.use(apiRouter);
+app.use("/api/cron", cronRouter);
 app.use("/api/express/auth", authRouter);
 app.use("/api/express/priority", priorityRouter);
 app.use("/api/express/ticket", ticketRouter);
@@ -174,498 +176,77 @@ clientSocket.on("ether1", (data) => {
 });
 
 if (process.env.MODE == "production") {
-  // microtic_logs
-  // cron.schedule("0 * * * *", async () => {
-  //   try {
-  //     const url =
-  //       process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
-
-  //     for (let i = 3; i < 7; i++) {
-  //       const uuid = "mrtk-00000" + i;
-
-  //       const params = {
-  //         uuid,
-  //       };
-
-  //       const response = await axios.post(url, params);
-  //       if (response.data.success) {
-  //         const responseData = response.data.massage;
-
-  //         let arrData = [];
-
-  //         const log = await database.query(`
-  //           SELECT * FROM microtic_logs WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-  //         `);
-
-  //         if (log[0].length == 0) {
-  //           responseData.forEach(async (value) => {
-  //             arrData.push(value);
-
-  //             await database.query(
-  //               `
-  //                   INSERT INTO microtic_logs(router, name,tx_byte, rx_byte,order_number, created_at) VALUES(
-  //                       '${uuid}',
-  //                       '${value.name}',
-  //                       '${value["tx-byte"]}',
-  //                       '${value["rx-byte"]}',
-  //                       1,
-  //                       '${await helper.getFormatedTime("datetime")}'
-  //                   ) RETURNING *
-  //                 `
-  //             );
-  //           });
-  //         } else {
-  //           const order_number = log[0][0].order_number + 1;
-
-  //           responseData.forEach(async (value) => {
-  //             arrData.push(value);
-
-  //             await database.query(
-  //               `
-  //                   INSERT INTO microtic_logs(router, name, tx_byte, rx_byte,order_number, created_at) VALUES(
-  //                       '${uuid}',
-  //                       '${value.name}',
-  //                       '${value["tx-byte"]}',
-  //                       '${value["rx-byte"]}',
-  //                       ${order_number},
-  //                       '${await helper.getFormatedTime("datetime")}'
-  //                   ) RETURNING *
-  //                 `
-  //             );
-  //           });
-  //         }
-  //       }
-  //     }
-
-  //     console.log("microtic_logs updated");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // });
-
-  // traffic by port
-  // cron.schedule("0 * * * *", async () => {
-  //   try {
-  //     let url = process.env.MICROTIC_API_ENV + "api/router/interface/list/print";
-
-  //     for (let i = 3; i < 7; i++) {
-  //       const uuid = "mrtk-00000" + i;
-
-  //       const params = {
-  //         uuid,
-  //       };
-
-  //       let response = await axios.post(url, params);
-
-  //       if (response.data.success) {
-  //         const responseData = response.data.massage;
-
-  //         const log = await database.query(`
-  //               SELECT * FROM traffic_by_ports WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-  //             `);
-
-  //         if (log[0].length == 0) {
-  //           responseData.forEach(async (value) => {
-  //             await database.query(
-  //               `
-  //                 INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
-  //                   '${uuid}',
-  //                   '${value.name.replace("'", "")}',
-  //                   '${value["rx-byte"]}',
-  //                   '${value["tx-byte"]}',
-  //                   '${value["mac-address"]}',
-  //                   1,
-  //                   '${await helper.getFormatedTime("datetime")}'
-  //                 ) RETURNING *
-  //               `
-  //             );
-  //           });
-  //         } else {
-  //           const order_number = log[0][0].order_number + 1;
-
-  //           responseData.forEach(async (value) => {
-  //             await database.query(
-  //               `
-  //                 INSERT INTO traffic_by_ports(router, name, rx_byte, tx_byte, mac_address, order_number, created_at) VALUES(
-  //                   '${uuid}',
-  //                   '${value.name.replace("'", "")}',
-  //                   '${value["rx-byte"]}',
-  //                   '${value["tx-byte"]}',
-  //                   '${value["mac-address"]}',
-  //                   ${order_number},
-  //                   '${await helper.getFormatedTime("datetime")}'
-  //                 ) RETURNING *
-  //               `
-  //             );
-  //           });
-  //         }
-  //       }
-  //     }
-
-  //     console.log("top_host_name updated");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // });
-
-  // top host name
-  // cron.schedule("0 * * * *", async () => {
-  //   try {
-  //     let url = process.env.MICROTIC_API_ENV + "api/router/ip/kid-controll/print";
-
-  //     for (let i = 3; i < 7; i++) {
-  //       const uuid = "mrtk-00000" + i;
-
-  //       const params = {
-  //         uuid,
-  //       };
-
-  //       let response = await axios.post(url, params);
-
-  //       if (response.data.success) {
-  //         const responseData = response.data.massage;
-
-  //         let arrData = [];
-
-  //         const log = await database.query(`
-  //               SELECT * FROM top_host_names WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-  //             `);
-
-  //         if (log[0].length == 0) {
-  //           responseData.forEach(async (value) => {
-  //             arrData.push(value);
-
-  //             await database.query(
-  //               `
-  //                       INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
-  //                           '${uuid}',
-  //                           '${value.name.replace("'", "")}',
-  //                           '${value["bytes-down"]}',
-  //                           '${value["mac-address"]}',
-  //                           1,
-  //                           '${await helper.getFormatedTime("datetime")}'
-  //                       ) RETURNING *
-  //                     `
-  //             );
-  //           });
-  //         } else {
-  //           const order_number = log[0][0].order_number + 1;
-
-  //           responseData.forEach(async (value) => {
-  //             arrData.push(value);
-
-  //             await database.query(
-  //               `
-  //                     INSERT INTO top_host_names(router, name, bytes_down, mac_address, order_number, created_at) VALUES(
-  //                       '${uuid}',
-  //                       '${value.name.replace("'", "")}',
-  //                       '${value["bytes-down"]}',
-  //                       '${value["mac-address"]}',
-  //                           ${order_number},
-  //                           '${await helper.getFormatedTime("datetime")}'
-  //                       ) RETURNING *
-  //                     `
-  //             );
-  //           });
-  //         }
-  //       }
-  //     }
-
-  //     console.log("top_host_name updated");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // });
-
-  // system resource
-  // cron.schedule("0 * * * *", async () => {
-  //   try {
-  //     let url =
-  //       process.env.MICROTIC_API_ENV + "api/router/system/resources/print";
-
-  //     for (let i = 3; i < 7; i++) {
-  //       const uuid = "mrtk-00000" + i;
-
-  //       const params = {
-  //         uuid,
-  //       };
-
-  //       let response = await axios.post(url, params);
-
-  //       if (response.data.success) {
-  //         const log = await database.query(`
-  //               SELECT * FROM system_resources WHERE router = '${uuid}' ORDER BY id DESC LIMIT 1
-  //             `);
-
-  //         const responseData = response.data.massage[0];
-
-  //         const totalMemory = responseData["total-memory"];
-  //         const freeMemory = responseData["free-memory"];
-
-  //         const memory_frequency =
-  //           Math.ceil(((totalMemory - freeMemory) / freeMemory) * 100 * 100) /
-  //           100;
-
-  //         if (log[0].length == 0) {
-  //           await database.query(
-  //             `
-  //               INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
-  //                   '${uuid}',
-  //                   '${memory_frequency}',
-  //                   '${responseData["cpu-load"]}',
-  //                   1,
-  //                   '${await helper.getFormatedTime("datetime")}'
-  //               ) RETURNING *
-  //             `
-  //           );
-  //         } else {
-  //           const order_number = log[0][0].order_number + 1;
-
-  //           await database.query(
-  //             `
-  //               INSERT INTO system_resources(router, memory_frequency, cpu_load, order_number, created_at) VALUES(
-  //                   '${uuid}',
-  //                   '${memory_frequency}',
-  //                   '${responseData["cpu-load"]}',
-  //                   ${order_number},
-  //                   '${await helper.getFormatedTime("datetime")}'
-  //               ) RETURNING *
-  //             `
-  //           );
-  //         }
-  //       }
-  //     }
-
-  //     console.log("top_host_name updated");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // });
-
-  // top_host_names;
-  cron.schedule("*/3 * * * * *", async () => {
-    try {
-      const today = moment().format("YYYY-MM-DD");
-
-      let routers = await database.query(`
-   SELECT * FROM routers WHERE deleted_at IS NULL
-  `);
-
-      if (routers[0].length > 0) {
-        routers = routers[0];
-
-        for (let i = 0; i < routers.length; i++) {
-          const url = `${process.env.MICROTIC_API_ENV}top-host-name/${routers[i].id}`;
-
-          axios
-            .get(url, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-            .then(async (response) => {
-              const data = response.data;
-
-              for (let j = 0; j < data.length; j++) {
-                const log = await database.query(`
-              SELECT * FROM top_host_names WHERE identifier = '${data[j].id}'
-            `);
-
-                if (log[0].length == 0) {
-                  await database.query(
-                    `
-                  INSERT INTO top_host_names(identifier, bytes_down, date, host_name, router, created_at) VALUES(
-                      '${data[j].id}',
-                      '${data[j].bytes_down}',
-                      '${today}',
-                      '${data[j].name}',
-                      '${routers[i].id}',
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-                  );
-                }
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching data:", error);
-            });
-        }
-      }
-
-      console.log("top host name updated");
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
-  // top_sites
-  cron.schedule("*/3 * * * * *", async () => {
-    try {
-      const today = moment().format("YYYY-MM-DD");
-
-      let routers = await database.query(`
-   SELECT * FROM routers WHERE deleted_at IS NULL
-  `);
-
-      if (routers[0].length > 0) {
-        routers = routers[0];
-
-        for (let i = 0; i < routers.length; i++) {
-          const url = `${process.env.MICROTIC_API_ENV}top-sites/${routers[i].id}`;
-
-          axios
-            .get(url, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-            .then(async (response) => {
-              const data = response.data;
-
-              for (let j = 0; j < data.length; j++) {
-                const log = await database.query(`
-              SELECT * FROM top_sites WHERE identifier = '${data[j].id}'
-            `);
-
-                if (log[0].length == 0) {
-                  await database.query(
-                    `
-                  INSERT INTO top_sites(identifier, date, name, router, activity, created_at) VALUES(
-                      '${data[j].id}',
-                      '${today}',
-                      '${data[j].name}',
-                      '${routers[i].id}',
-                      '${data[j].activity}',
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-                  );
-                }
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching data:", error);
-            });
-        }
-      }
-
-      console.log("top host name updated");
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
   // top interface
-  cron.schedule("*/1 * * * * *", async () => {
-    try {
-      const today = moment().format("YYYY-MM-DD");
-
-      let routers = await database.query(`
-      SELECT * FROM routers WHERE deleted_at IS NULL
-    `);
-
-      if (routers[0].length > 0) {
-        routers = routers[0];
-
-        for (let i = 0; i < routers.length; i++) {
-          const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
-
-          axios
-            .get(url, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-            .then(async (response) => {
-              const data = response.data;
-
-              for (let j = 0; j < data.length; j++) {
-                let counter = 1;
-
-                let latest = await database.query(`
-                SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
-              `);
-
-                if (latest[0].length == 1) {
-                  counter = latest[0][0].counter + 1;
-                }
-
-                await database.query(
-                  `
-                  INSERT INTO top_interfaces(router, name, rx_byte, tx_byte, date, counter, created_at) VALUES(
-                      '${routers[i].id}',
-                      '${data[j].name}',
-                      '${data[j].rx_byte}',
-                      '${data[j].tx_byte}',
-                      '${today}',
-                      '${counter}',
-                      '${await helper.getFormatedTime("datetime")}'
-                  ) RETURNING *
-                `
-                );
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching data:", error);
-            });
-        }
-      }
-
-      console.log("top interface updated");
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
-  // system resource
-  cron.schedule("0 * * * *", async () => {
-    try {
-      const today = moment().format("YYYY-MM-DD");
-
-      let routers = await database.query(`
-      SELECT * FROM routers WHERE deleted_at IS NULL
-    `);
-
-      if (routers[0].length > 0) {
-        routers = routers[0];
-
-        for (let i = 0; i < routers.length; i++) {
-          const url = `${process.env.MICROTIC_API_ENV}system/resources/${routers[i].id}`;
-
-          axios
-            .get(url, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            })
-            .then(async (response) => {
-              const data = response.data;
-
-              await database.query(
-                `
-            INSERT INTO system_resources(router, cpu, hdd, memory, date, created_at) VALUES(
-                '${routers[i].id}',
-                '${data.cpu}',
-                '${data.hdd}',
-                '${data.memory}',
-                '${today}',
-                '${await helper.getFormatedTime("datetime")}'
-            ) RETURNING *
-          `
-              );
-            })
-            .catch((error) => {
-              console.error("Error fetching data:", error);
-            });
-        }
-      }
-
-      console.log("system resource updated");
-    } catch (error) {
-      console.log(error);
-    }
-  });
+  // cron.schedule("*/1 * * * * *", async () => {
+  //   try {
+  //     const today = moment().format("YYYY-MM-DD");
+  //     let routers = await database.query(`
+  //     SELECT * FROM routers WHERE deleted_at IS NULL
+  //   `);
+  //     if (routers[0].length > 0) {
+  //       routers = routers[0];
+  //       for (let i = 0; i < routers.length; i++) {
+  //         const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
+  //         axios
+  //           .get(url, {
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //             },
+  //           })
+  //           .then(async (response) => {
+  //             const data = response.data;
+  //             for (let j = 0; j < data.length; j++) {
+  //               let counter = 1;
+  //               let latest = await database.query(`
+  //               SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
+  //             `);
+  //               if (latest[0].length == 1) {
+  //                 counter = latest[0][0].counter + 1;
+  //               }
+  //               await database.query(
+  //                 `
+  //                 INSERT INTO top_interfaces(router, name, default_name, data_id, type, mtu, actual_mtu, l2mtu, max_l2mtu, mac_address, last_link_up_time, link_downs, rx_byte, tx_byte, rx_packet, tx_packet, tx_queue_drop, fp_rx_byte, fp_tx_byte, fp_rx_packet, fp_tx_packet, running, disabled, date, counter, created_at) VALUES(
+  //                     '${routers[i].id}',
+  //                     '${data[j].name}',
+  //                     '${data[j]["default-name"]}',
+  //                     '${data[j][".id"]}',
+  //                     '${data[j]["type"]}',
+  //                     '${data[j]["mtu"]}',
+  //                     '${data[j]["actual-mtu"]}',
+  //                     '${data[j]["l2mtu"]}',
+  //                     '${data[j]["max-l2mtu"]}',
+  //                     '${data[j]["mac-address"]}',
+  //                     '${data[j]["last-link-up-time"]}',
+  //                     '${data[j]["link-downs"]}',
+  //                     '${data[j]["rx-byte"]}',
+  //                     '${data[j]["tx-byte"]}',
+  //                     '${data[j]["rx-packet"]}',
+  //                     '${data[j]["tx-packet"]}',
+  //                     '${data[j]["tx-queue-drop"]}',
+  //                     '${data[j]["fp-rx-byte"]}',
+  //                     '${data[j]["fp-tx-byte"]}',
+  //                     '${data[j]["fp-rx-packet"]}',
+  //                     '${data[j]["fp-tx-packet"]}',
+  //                     '${data[j]["running"]}',
+  //                     '${data[j]["disabled"]}',
+  //                     '${today}',
+  //                     '${counter}',
+  //                     '${await helper.getFormatedTime("datetime")}'
+  //                 ) RETURNING *
+  //               `
+  //               );
+  //             }
+  //           })
+  //           .catch((error) => {
+  //             console.error("Error fetching data:", error);
+  //           });
+  //       }
+  //     }
+  //     console.log("top interface updated");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // });
 }
 
 async function triggerSocket(socket) {
@@ -761,7 +342,7 @@ io.on("connection", async (socket) => {
     try {
       const data = await getDHCPServersIo({ router });
 
-      io.emit("new-data", data);
+      io.emit("new-servers", data);
     } catch (error) {
       console.log(error);
       io.emit("error", { message: error.message });
@@ -772,7 +353,7 @@ io.on("connection", async (socket) => {
     try {
       const data = await getCurrentTxRxIo({ router });
 
-      io.emit("new-data", data);
+      io.emit("new-bandwith", data);
     } catch (error) {
       console.log(error);
       io.emit("error", { message: error.message });
@@ -783,7 +364,7 @@ io.on("connection", async (socket) => {
     try {
       const data = await getGraphTopInterfaceIo();
 
-      io.emit("new-data", data);
+      io.emit("new-graph", data);
     } catch (error) {
       console.log(error);
       io.emit("error", { message: error.message });
@@ -795,10 +376,10 @@ io.on("connection", async (socket) => {
   });
 });
 
-bot.start((ctx) => ctx.reply("Hello from the bot!"));
-bot.launch().then(() => {
-  console.log("Bot is running");
-});
+// bot.start((ctx) => ctx.reply("Hello from the bot!"));
+// bot.launch().then(() => {
+//   console.log("Bot is running");
+// });
 
 server.listen(PORT, () => {
   console.log(`Listening on *:${PORT}`);

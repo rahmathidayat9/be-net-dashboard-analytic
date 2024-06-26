@@ -72,10 +72,45 @@ module.exports = {
               ? highest[0][0].tx_byte - lowest[0][0].tx_byte
               : highest[0][0].tx_byte;
 
+          // const rx_packet =
+          //   highest[0][0].rx_packet !== lowest[0][0].rx_packet
+          //     ? highest[0][0].rx_packet - lowest[0][0].rx_packet
+          //     : highest[0][0].rx_packet;
+
+          // const tx_packet =
+          //   highest[0][0].tx_packet !== lowest[0][0].tx_packet
+          //     ? highest[0][0].tx_packet - lowest[0][0].tx_packet
+          //     : highest[0][0].tx_packet;
+
+          // const tx_queue_drop =
+          //   highest[0][0].tx_queue_drop !== lowest[0][0].tx_queue_drop
+          //     ? highest[0][0].tx_queue_drop - lowest[0][0].tx_queue_drop
+          //     : highest[0][0].tx_queue_drop;
+
+          // const fp_rx_byte =
+          //   highest[0][0].fp_rx_byte !== lowest[0][0].fp_rx_byte
+          //     ? highest[0][0].fp_rx_byte - lowest[0][0].fp_rx_byte
+          //     : highest[0][0].fp_rx_byte;
+
+          // const fp_tx_byte =
+          //   highest[0][0].fp_tx_byte !== lowest[0][0].fp_tx_byte
+          //     ? highest[0][0].fp_tx_byte - lowest[0][0].fp_tx_byte
+          //     : highest[0][0].fp_tx_byte;
+
+          // const fp_rx_packet =
+          //   highest[0][0].fp_rx_packet !== lowest[0][0].fp_rx_packet
+          //     ? highest[0][0].fp_rx_packet - lowest[0][0].fp_rx_packet
+          //     : highest[0][0].fp_rx_packet;
+
+          // const fp_tx_packet =
+          //   highest[0][0].fp_tx_packet !== lowest[0][0].fp_tx_packet
+          //     ? highest[0][0].fp_tx_packet - lowest[0][0].fp_tx_packet
+          //     : highest[0][0].fp_tx_packet;
+
           data.push({
             ethernet: names[i],
-            rx_byte: helper.formatBytesnonSuffix(parseFloat(rx_byte)),
-            tx_byte: helper.formatBytesnonSuffix(parseFloat(tx_byte)),
+            rx_byte,
+            tx_byte,
           });
         }
       } else {
@@ -118,11 +153,13 @@ module.exports = {
 
           data.push({
             ethernet: names[i],
-            rx_byte: helper.formatBytesnonSuffix(parseFloat(rx_byte)),
-            tx_byte: helper.formatBytesnonSuffix(parseFloat(tx_byte)),
+            rx_byte,
+            tx_byte,
           });
         }
       }
+
+      data.sort((a, b) => (parseInt(a.rx_byte) < parseInt(b.rx_byte) ? 1 : -1));
 
       return helper.response(res, 200, "Data ditemukan", {
         today,
@@ -160,12 +197,8 @@ module.exports = {
       for (i = 0; i < exists[0].length; i++) {
         data.push({
           created_at: exists[0][i].created_at,
-          rx_byte: helper.formatBytesnonSuffix(
-            parseFloat(exists[0][i].rx_byte)
-          ),
-          tx_byte: helper.formatBytesnonSuffix(
-            parseFloat(exists[0][i].tx_byte)
-          ),
+          rx_byte: exists[0][i].rx_byte,
+          tx_byte: exists[0][i].tx_byte,
         });
       }
 
@@ -201,12 +234,8 @@ module.exports = {
       for (i = 0; i < exists[0].length; i++) {
         data.push({
           created_at: exists[0][i].created_at,
-          rx_byte: helper.formatBytesnonSuffix(
-            parseFloat(exists[0][i].rx_byte)
-          ),
-          tx_byte: helper.formatBytesnonSuffix(
-            parseFloat(exists[0][i].tx_byte)
-          ),
+          rx_byte: exists[0][i].rx_byte,
+          tx_byte: exists[0][i].tx_byte,
         });
       }
 

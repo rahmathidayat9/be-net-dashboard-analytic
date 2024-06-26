@@ -49,7 +49,7 @@ const migrate = async () => {
     );
 
     await database.query(
-      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY, host varchar(255) NOT NULL, username varchar(255) NOT NULL, pass varchar(255) NOT NULL, port int NOT NULL, ethernet varchar(255) NOT NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
+      "CREATE TABLE routers (id int NOT NULL GENERATED ALWAYS AS IDENTITY,  name varchar(255),  host varchar(255) NOT NULL, username varchar(255) NOT NULL, pass varchar(255) NOT NULL, port int NOT NULL, ethernet varchar(255) NOT NULL, status varchar(255) NOT NULL, created_at timestamp(0) NOT NULL, updated_at timestamp(0) NULL DEFAULT NULL, deleted_at timestamp(0) NULL DEFAULT NULL, PRIMARY KEY (id))"
     );
 
     await database.query(
@@ -64,8 +64,47 @@ const migrate = async () => {
       "CREATE TABLE microtic_logs (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router varchar(255) NOT NULL, name varchar(255) NOT NULL, rx_byte varchar(255) NOT NULL, tx_byte varchar(255) NOT NULL, order_number int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
     );
 
+    // await database.query(
+    //   `CREATE TABLE top_interfaces (
+    //   id int NOT NULL GENERATED ALWAYS AS IDENTITY,
+    //   router int NOT NULL,
+    //   data_id varchar(255),
+    //   name varchar(255),
+    //   default_name varchar(255),
+    //   type varchar(255),
+    //   mtu varchar(255),
+    //   actual_mtu varchar(255),
+    //   l2mtu varchar(255),
+    //   max_l2mtu varchar(255),
+    //   mac_address varchar(255),
+    //   last_link_up_time varchar(255),
+    //   link_downs varchar(255),
+    //   rx_byte bigint,
+    //   tx_byte bigint,
+    //   rx_packet bigint,
+    //   tx_packet bigint,
+    //   tx_queue_drop bigint,
+    //   fp_rx_byte bigint,
+    //   fp_tx_byte bigint,
+    //   fp_rx_packet bigint,
+    //   fp_tx_packet bigint,
+    //   running varchar(255),
+    //   disabled varchar(255),
+    //   date date NOT NULL,
+    //   counter int NOT NULL,
+    //   created_at timestamp(0) NOT NULL,
+    //   PRIMARY KEY (id))`
+    // );
     await database.query(
-      "CREATE TABLE top_interfaces (id int NOT NULL GENERATED ALWAYS AS IDENTITY, router int NOT NULL, name varchar(255) NOT NULL, rx_byte bigint, tx_byte bigint, date date NOT NULL, counter int NOT NULL, created_at timestamp(0) NOT NULL, PRIMARY KEY (id))"
+      `CREATE TABLE top_interfaces (
+      id int NOT NULL GENERATED ALWAYS AS IDENTITY, 
+      router int NOT NULL, 
+      rx_byte bigint, 
+      tx_byte bigint,
+      date date NOT NULL, 
+      counter int NOT NULL, 
+      created_at timestamp(0) NOT NULL, 
+      PRIMARY KEY (id))`
     );
 
     await database.query(
@@ -202,8 +241,9 @@ const migrate = async () => {
 
     await database.query(
       `
-        INSERT INTO routers(host,username,pass,port,ethernet,status, created_at) VALUES(
+        INSERT INTO routers(host,name,username,pass,port,ethernet,status, created_at) VALUES(
             '191.101.190.202',
+            'RouterOS',
             'monitor_stb',
             'Joseph12345!',
             '8042',

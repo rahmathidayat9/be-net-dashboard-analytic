@@ -58,8 +58,8 @@ module.exports = {
 
         data = {
           ethernet,
-          rx_byte: helper.formatBytesnonSuffix(rx_byte),
-          tx_byte: helper.formatBytesnonSuffix(tx_byte),
+          rx_byte,
+          tx_byte,
         };
       } else {
         const exists = await database.query(`
@@ -83,8 +83,8 @@ module.exports = {
 
         data = {
           ethernet,
-          rx_byte: helper.formatBytesnonSuffix(rx_byte),
-          tx_byte: helper.formatBytesnonSuffix(tx_byte),
+          rx_byte,
+          tx_byte,
         };
       }
 
@@ -99,35 +99,40 @@ module.exports = {
 
   getCurrentTxRxIo: async ({ router }) => {
     try {
-      let result;
+      let today = moment().format("YYYY-MM-DD");
 
-      const query = await database.query(`
-        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active' AND id = '${router}'
+      const activeRouter = await database.query(`
+        SELECT * FROM routers WHERE id = '${router}'
       `);
 
-      const id = query[0][0].id;
-      const ethernet = query[0][0].ethernet;
+      const ethernet = activeRouter[0][0].ethernet;
 
-      const url = `${process.env.MICROTIC_API_ENV}interfaces/${id}`;
+      const lowest = await database.query(`
+        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}' ORDER BY id ASC LIMIT 1
+        `);
 
-      const response = await axios.get(url, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const highest = await database.query(`
+        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}' ORDER BY id DESC LIMIT 1
+      `);
 
-      const data = response.data;
-
-      for (let j = 0; j < data.length; j++) {
-        if (data[j].name == ethernet) {
-          result = {
-            rx_byte: helper.formatBytesnonSuffix(data[j].rx_byte),
-            tx_byte: helper.formatBytesnonSuffix(data[j].tx_byte),
-          };
-
-          return result;
-        }
+      if (lowest[0].length == 0) {
+        return {
+          ethernet,
+          rx_byte: 0,
+          tx_byte: 0,
+        };
       }
+
+      const rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
+      const tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+
+      data = {
+        ethernet,
+        rx_byte,
+        tx_byte,
+      };
+
+      return data;
     } catch (errorRes) {
       console.log(errorRes);
       return errorRes;

@@ -6,8 +6,9 @@
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "express-session": "^1.17.3",
+    "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "morgan": "^1.10.0",
@@ -21,7 +22,7 @@
     "pg": "^8.11.3",
     "randomstring": "^1.3.0",
     "sequelize": "^6.35.2",
-    "socket.io": "^4.7.2",
+    "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.2",
     "ssh2": "^1.15.0",
     "telegraf": "^3.38.0"
@@ -32,6 +33,7 @@
   "main": "index.js",
   "scripts": {
     "migrate": "node db/migration.js",
+    "cron": "node cron/index.js",
     "test": "nodemon test.js",
     "server": "nodemon server.js"
   },
