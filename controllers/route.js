@@ -137,7 +137,7 @@ module.exports = {
   // NOTE tambah route
   store: async (req, res) => {
     try {
-      let { host, username, pass, port, ethernet } = req.body;
+      let { name, host, username, pass, port, ethernet } = req.body;
 
       switch (true) {
         case !host:
@@ -161,7 +161,8 @@ module.exports = {
 
       await database.query(
         `
-            INSERT INTO routers(host, username, pass, port, ethernet, status, created_at) VALUES(
+            INSERT INTO routers(name, host, username, pass, port, ethernet, status, created_at) VALUES(
+                '${name}',
                 '${host}',
                 '${username}',
                 '${pass}',
@@ -188,7 +189,7 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      let { host, username, pass, port, ethernet } = req.body;
+      let { name, host, username, pass, port, ethernet } = req.body;
 
       switch (true) {
         case !host:
@@ -218,7 +219,7 @@ module.exports = {
 
       await database.query(
         `
-          UPDATE routers SET host = '${host}', username = '${username}', pass = '${pass}', ethernet = '${ethernet}', port = '${port}', updated_at = '${await helper.getFormatedTime(
+          UPDATE routers SET name = '${name}', host = '${host}', username = '${username}', pass = '${pass}', ethernet = '${ethernet}', port = '${port}', updated_at = '${await helper.getFormatedTime(
           "datetime"
         )}' WHERE id = ${id}
         `
