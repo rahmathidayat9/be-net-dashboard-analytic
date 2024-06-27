@@ -1,4 +1,3 @@
-const axios = require("axios");
 const moment = require("moment");
 
 const database = require("../config/database");
@@ -52,15 +51,46 @@ module.exports = {
 
   getDHCPServersIo: async ({ router }) => {
     try {
-      const url = `${process.env.MICROTIC_API_ENV}ip/dhcp-servers/${router}`;
+      let creds = await database.query(`
+        SELECT * FROM routers WHERE id = '${router}' AND deleted_at IS NULL
+      `);
 
-      const response = await axios.get(url, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const mikrotik = await helper.mikrotikCommand(
+        creds[0][0],
+        "/ip/dhcp-server/lease/print"
+      );
+
+      let details = [];
+
+      let active = 0;
+      let inactive = 0;
+
+      mikrotik.map((m) => {
+        const status = m.hasOwnProperty("last-seen") ? "active" : "inactive";
+
+        if (status == "active") {
+          active = active + 1;
+        } else {
+          inactive = inactive + 1;
+        }
+
+        details.push({
+          address: m["address"],
+          name: m.hasOwnProperty("host-name") ? m["host-name"] : "",
+          last_seen: m.hasOwnProperty("last-seen")
+            ? helper.convertToPastDate(m["last-seen"])
+            : "",
+          status,
+        });
       });
 
-      return response.data;
+      data = {
+        active,
+        details,
+        inactive,
+      };
+
+      return data;
     } catch (error) {
       console.log(error);
       return error.message;

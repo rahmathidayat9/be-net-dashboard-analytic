@@ -1,6 +1,5 @@
 const express = require("express");
 const http = require("http");
-const moment = require("moment");
 const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
@@ -28,11 +27,8 @@ const ticketRouter = require("./routes/ticket");
 const topHostNameRouter = require("./routes/topHostName");
 const topSiteRouter = require("./routes/topSite");
 const topInterfaceRouter = require("./routes/topInterface");
-const trafficByPortRouter = require("./routes/trafficByPort");
-const cronRouter = require("./routes/cron");
 const userRouter = require("./routes/user");
 const profileRoute = require("./routes/profile");
-const helper = require("./helpers");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
 const { getGraphTopInterfaceIo } = require("./controllers/topInterface.js");
 const { getCurrentTxRxIo } = require("./controllers/bandwith");
@@ -95,7 +91,6 @@ const upload = multer({ storage: storage });
 // Middleware for handling form-data
 app.use(upload.any());
 // app.use(apiRouter);
-app.use("/api/cron", cronRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/priority", priorityRouter);
 app.use("/api/ticket", ticketRouter);
@@ -175,79 +170,77 @@ clientSocket.on("ether1", (data) => {
   isProcessing = false;
 });
 
-if (process.env.MODE == "production") {
-  // top interface
-  // cron.schedule("*/1 * * * * *", async () => {
-  //   try {
-  //     const today = moment().format("YYYY-MM-DD");
-  //     let routers = await database.query(`
-  //     SELECT * FROM routers WHERE deleted_at IS NULL
-  //   `);
-  //     if (routers[0].length > 0) {
-  //       routers = routers[0];
-  //       for (let i = 0; i < routers.length; i++) {
-  //         const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
-  //         axios
-  //           .get(url, {
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //             },
-  //           })
-  //           .then(async (response) => {
-  //             const data = response.data;
-  //             for (let j = 0; j < data.length; j++) {
-  //               let counter = 1;
-  //               let latest = await database.query(`
-  //               SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
-  //             `);
-  //               if (latest[0].length == 1) {
-  //                 counter = latest[0][0].counter + 1;
-  //               }
-  //               await database.query(
-  //                 `
-  //                 INSERT INTO top_interfaces(router, name, default_name, data_id, type, mtu, actual_mtu, l2mtu, max_l2mtu, mac_address, last_link_up_time, link_downs, rx_byte, tx_byte, rx_packet, tx_packet, tx_queue_drop, fp_rx_byte, fp_tx_byte, fp_rx_packet, fp_tx_packet, running, disabled, date, counter, created_at) VALUES(
-  //                     '${routers[i].id}',
-  //                     '${data[j].name}',
-  //                     '${data[j]["default-name"]}',
-  //                     '${data[j][".id"]}',
-  //                     '${data[j]["type"]}',
-  //                     '${data[j]["mtu"]}',
-  //                     '${data[j]["actual-mtu"]}',
-  //                     '${data[j]["l2mtu"]}',
-  //                     '${data[j]["max-l2mtu"]}',
-  //                     '${data[j]["mac-address"]}',
-  //                     '${data[j]["last-link-up-time"]}',
-  //                     '${data[j]["link-downs"]}',
-  //                     '${data[j]["rx-byte"]}',
-  //                     '${data[j]["tx-byte"]}',
-  //                     '${data[j]["rx-packet"]}',
-  //                     '${data[j]["tx-packet"]}',
-  //                     '${data[j]["tx-queue-drop"]}',
-  //                     '${data[j]["fp-rx-byte"]}',
-  //                     '${data[j]["fp-tx-byte"]}',
-  //                     '${data[j]["fp-rx-packet"]}',
-  //                     '${data[j]["fp-tx-packet"]}',
-  //                     '${data[j]["running"]}',
-  //                     '${data[j]["disabled"]}',
-  //                     '${today}',
-  //                     '${counter}',
-  //                     '${await helper.getFormatedTime("datetime")}'
-  //                 ) RETURNING *
-  //               `
-  //               );
-  //             }
-  //           })
-  //           .catch((error) => {
-  //             console.error("Error fetching data:", error);
-  //           });
-  //       }
-  //     }
-  //     console.log("top interface updated");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // });
-}
+// top interface
+// cron.schedule("*/1 * * * * *", async () => {
+//   try {
+//     const today = moment().format("YYYY-MM-DD");
+//     let routers = await database.query(`
+//     SELECT * FROM routers WHERE deleted_at IS NULL
+//   `);
+//     if (routers[0].length > 0) {
+//       routers = routers[0];
+//       for (let i = 0; i < routers.length; i++) {
+//         const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
+//         axios
+//           .get(url, {
+//             headers: {
+//               "Content-Type": "application/json",
+//             },
+//           })
+//           .then(async (response) => {
+//             const data = response.data;
+//             for (let j = 0; j < data.length; j++) {
+//               let counter = 1;
+//               let latest = await database.query(`
+//               SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
+//             `);
+//               if (latest[0].length == 1) {
+//                 counter = latest[0][0].counter + 1;
+//               }
+//               await database.query(
+//                 `
+//                 INSERT INTO top_interfaces(router, name, default_name, data_id, type, mtu, actual_mtu, l2mtu, max_l2mtu, mac_address, last_link_up_time, link_downs, rx_byte, tx_byte, rx_packet, tx_packet, tx_queue_drop, fp_rx_byte, fp_tx_byte, fp_rx_packet, fp_tx_packet, running, disabled, date, counter, created_at) VALUES(
+//                     '${routers[i].id}',
+//                     '${data[j].name}',
+//                     '${data[j]["default-name"]}',
+//                     '${data[j][".id"]}',
+//                     '${data[j]["type"]}',
+//                     '${data[j]["mtu"]}',
+//                     '${data[j]["actual-mtu"]}',
+//                     '${data[j]["l2mtu"]}',
+//                     '${data[j]["max-l2mtu"]}',
+//                     '${data[j]["mac-address"]}',
+//                     '${data[j]["last-link-up-time"]}',
+//                     '${data[j]["link-downs"]}',
+//                     '${data[j]["rx-byte"]}',
+//                     '${data[j]["tx-byte"]}',
+//                     '${data[j]["rx-packet"]}',
+//                     '${data[j]["tx-packet"]}',
+//                     '${data[j]["tx-queue-drop"]}',
+//                     '${data[j]["fp-rx-byte"]}',
+//                     '${data[j]["fp-tx-byte"]}',
+//                     '${data[j]["fp-rx-packet"]}',
+//                     '${data[j]["fp-tx-packet"]}',
+//                     '${data[j]["running"]}',
+//                     '${data[j]["disabled"]}',
+//                     '${today}',
+//                     '${counter}',
+//                     '${await helper.getFormatedTime("datetime")}'
+//                 ) RETURNING *
+//               `
+//               );
+//             }
+//           })
+//           .catch((error) => {
+//             console.error("Error fetching data:", error);
+//           });
+//       }
+//     }
+//     console.log("top interface updated");
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 async function triggerSocket(socket) {
   const storedData = JSON.parse(localStorage.getItem("dataInterface"));

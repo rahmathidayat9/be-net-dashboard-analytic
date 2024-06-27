@@ -49,7 +49,9 @@ module.exports = {
         `);
 
         for (let i = 0; i < query[0].length; i++) {
-          activities.push(query[0][i].activity);
+          if (!activities.includes(query[0][i].activity)) {
+            activities.push(query[0][i].activity);
+          }
         }
 
         for (i = 0; i < activities.length; i++) {
@@ -58,10 +60,16 @@ module.exports = {
             AND date::date >= '${start_date}'::date AND router = '${router}' AND activity = '${activities[i]}'
               `);
 
+          let arr = [];
+
           let names = "";
 
           for (let j = 0; j < query[0].length; j++) {
-            names = names + query[0][j].name + ", ";
+            if (!arr.includes(query[0][j].name)) {
+              names = names + query[0][j].name + ", ";
+            }
+
+            arr.push(query[0][j].name);
           }
 
           names = names.substring(0, names.length - 2);
@@ -88,7 +96,9 @@ module.exports = {
         `);
 
         for (let i = 0; i < query[0].length; i++) {
-          activities.push(query[0][i].activity);
+          if (!activities.includes(query[0][i].activity)) {
+            activities.push(query[0][i].activity);
+          }
         }
 
         for (i = 0; i < activities.length; i++) {
@@ -96,10 +106,16 @@ module.exports = {
             SELECT * FROM top_sites WHERE date::date = '${today}' AND router = '${router}' AND activity = '${activities[i]}'
           `);
 
+          let arr = [];
+
           let names = "";
 
           for (let j = 0; j < query[0].length; j++) {
-            names = names + query[0][j].name + ", ";
+            if (!arr.includes(query[0][j].name)) {
+              names = names + query[0][j].name + ", ";
+            }
+
+            arr.push(query[0][j].name);
           }
 
           names = names.substring(0, names.length - 2);
