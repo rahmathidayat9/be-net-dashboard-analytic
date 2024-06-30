@@ -66,11 +66,45 @@ module.exports = {
   },
 
   generateRefreshToken: async (id) => {
+    const getFormatedTime = (format) => {
+      var now = new Date();
+
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+
+      if (format == "datetime") {
+        format = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      }
+
+      if (format == "date") {
+        format = `${year}-${month}-${day}`;
+      }
+
+      if (format == "week") {
+        now = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7);
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+
+        format = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      }
+
+      return format;
+    };
+
     const token = await database.query(
       `
         INSERT INTO refresh_tokens (user_id, token, expire_at, created_at) VALUES(
             '${id}',
-            '${randomTokenString()}',
+            '${randomstring.generate(40)}',
             '${await getFormatedTime("week")}',
             '${await getFormatedTime("datetime")}'
         ) RETURNING token
