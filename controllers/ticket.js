@@ -215,39 +215,39 @@ module.exports = {
       let ticket;
 
       // if (req.user.role == "teknisi" || req.user.role == "satker") {
-        // ticket = await database.query(`
-        //   SELECT * FROM tickets WHERE id = ${id} AND user_id = ${req.user.id} AND tickets.status <> 'deleted'
-        // `);
+      // ticket = await database.query(`
+      //   SELECT * FROM tickets WHERE id = ${id} AND user_id = ${req.user.id} AND tickets.status <> 'deleted'
+      // `);
 
-        // if (ticket[0].length == 0) {
-        //   return helper.response(res, 400, "Data tidak ditemukan");
-        // }
+      // if (ticket[0].length == 0) {
+      //   return helper.response(res, 400, "Data tidak ditemukan");
+      // }
       // } else {
-        ticket = await database.query(`
+      ticket = await database.query(`
           SELECT * FROM tickets WHERE id = ${id} AND tickets.status <> 'deleted'
         `);
 
-        if (ticket[0].length == 0) {
-          return helper.response(res, 400, "Data tidak ditemukan");
-        }
+      if (ticket[0].length == 0) {
+        return helper.response(res, 400, "Data tidak ditemukan");
+      }
 
-        if (!priority_id || priority_id == "" || priority_id.length == 0) {
-          priority_id = ticket[0][0].priority_id;
-        }
+      if (!priority_id || priority_id == "" || priority_id.length == 0) {
+        priority_id = ticket[0][0].priority_id;
+      }
 
-        if (!due_date || due_date == "" || due_date.length == 0) {
-          if (!ticket[0][0].due_date) {
-            return helper.response(res, 400, "Mohon isi due_date");
-          } else {
-            due_date = ticket[0][0].due_date;
-          }
+      if (!due_date || due_date == "" || due_date.length == 0) {
+        if (!ticket[0][0].due_date) {
+          return helper.response(res, 400, "Mohon isi due_date");
         } else {
-          due_date = moment(due_date).format("YYYY-MM-DD");
+          due_date = ticket[0][0].due_date;
         }
+      } else {
+        due_date = moment(due_date).format("YYYY-MM-DD");
+      }
 
-        await database.query(
-          `UPDATE tickets SET priority_id = ${priority_id}, due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
-        );
+      await database.query(
+        `UPDATE tickets SET priority_id = ${priority_id}, due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
+      );
       // }
 
       await database.query(
@@ -260,7 +260,7 @@ module.exports = {
           ) RETURNING *
         `
       );
-      
+
       return helper.response(res, 200, "Balasan berhasil dikirim");
     } catch (err) {
       console.log(err);
@@ -306,36 +306,36 @@ module.exports = {
       // if (req.user.role == "teknisi" || req.user.role == "satker") {
       //   ticket = await database.query(`
       //     SELECT
-      //       tickets."id", 
-      //       tickets.detail, 
-      //       tickets.status, 
+      //       tickets."id",
+      //       tickets.detail,
+      //       tickets.status,
       //       tickets.created_at,
       //       tickets.number,
       //       tickets.due_date,
       //       tickets.cause,
       //       tickets.solution,
-      //       users."name" AS "user", 
+      //       users."name" AS "user",
       //       priorities."name" AS priority
       //     FROM
       //       tickets
       //       INNER JOIN
       //       users
-      //       ON 
+      //       ON
       //         tickets.user_id = users."id"
       //       LEFT JOIN
       //       priorities
-      //       ON 
+      //       ON
       //         tickets.priority_id = priorities."id"
       //     WHERE
       //       tickets.id = ${id},
       //       AND
       //       tickets.user_id = ${req.user.id}
       //       AND
-	    //       tickets.status <> 'pending'
+      //       tickets.status <> 'pending'
       //       AND
       //       tickets.status <> 'deleted'
       //     ORDER BY
-	    //       tickets.created_at DESC
+      //       tickets.created_at DESC
       //   `);
       // }
 

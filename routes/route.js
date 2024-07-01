@@ -6,6 +6,7 @@ const middleware = require("../middleware");
 const router = express.Router();
 
 router.get("/", controller.index);
+router.get("/active", controller.getActive);
 router.get("/:id", controller.show);
 router.post("/", controller.store);
 router.put("/active/:id", controller.active);

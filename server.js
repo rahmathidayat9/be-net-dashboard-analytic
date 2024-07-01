@@ -140,78 +140,6 @@ clientSocket.on("ether1", (data) => {
   isProcessing = false;
 });
 
-// top interface
-// cron.schedule("*/1 * * * * *", async () => {
-//   try {
-//     const today = moment().format("YYYY-MM-DD");
-//     let routers = await database.query(`
-//     SELECT * FROM routers WHERE deleted_at IS NULL
-//   `);
-//     if (routers[0].length > 0) {
-//       routers = routers[0];
-//       for (let i = 0; i < routers.length; i++) {
-//         const url = `${process.env.MICROTIC_API_ENV}interfaces/${routers[i].id}`;
-//         axios
-//           .get(url, {
-//             headers: {
-//               "Content-Type": "application/json",
-//             },
-//           })
-//           .then(async (response) => {
-//             const data = response.data;
-//             for (let j = 0; j < data.length; j++) {
-//               let counter = 1;
-//               let latest = await database.query(`
-//               SELECT * FROM top_interfaces WHERE router = '${routers[i].id}' AND name = '${data[j].name}' AND date = '${today}' ORDER BY counter DESC LIMIT 1
-//             `);
-//               if (latest[0].length == 1) {
-//                 counter = latest[0][0].counter + 1;
-//               }
-//               await database.query(
-//                 `
-//                 INSERT INTO top_interfaces(router, name, default_name, data_id, type, mtu, actual_mtu, l2mtu, max_l2mtu, mac_address, last_link_up_time, link_downs, rx_byte, tx_byte, rx_packet, tx_packet, tx_queue_drop, fp_rx_byte, fp_tx_byte, fp_rx_packet, fp_tx_packet, running, disabled, date, counter, created_at) VALUES(
-//                     '${routers[i].id}',
-//                     '${data[j].name}',
-//                     '${data[j]["default-name"]}',
-//                     '${data[j][".id"]}',
-//                     '${data[j]["type"]}',
-//                     '${data[j]["mtu"]}',
-//                     '${data[j]["actual-mtu"]}',
-//                     '${data[j]["l2mtu"]}',
-//                     '${data[j]["max-l2mtu"]}',
-//                     '${data[j]["mac-address"]}',
-//                     '${data[j]["last-link-up-time"]}',
-//                     '${data[j]["link-downs"]}',
-//                     '${data[j]["rx-byte"]}',
-//                     '${data[j]["tx-byte"]}',
-//                     '${data[j]["rx-packet"]}',
-//                     '${data[j]["tx-packet"]}',
-//                     '${data[j]["tx-queue-drop"]}',
-//                     '${data[j]["fp-rx-byte"]}',
-//                     '${data[j]["fp-tx-byte"]}',
-//                     '${data[j]["fp-rx-packet"]}',
-//                     '${data[j]["fp-tx-packet"]}',
-//                     '${data[j]["running"]}',
-//                     '${data[j]["disabled"]}',
-//                     '${today}',
-//                     '${counter}',
-//                     '${await helper.getFormatedTime("datetime")}'
-//                 ) RETURNING *
-//               `
-//               );
-//             }
-//           })
-//           .catch((error) => {
-//             console.error("Error fetching data:", error);
-//           });
-//       }
-//     }
-//     console.log("top interface updated");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
-
 async function triggerSocket(socket) {
   const storedData = JSON.parse(localStorage.getItem("dataInterface"));
   console.log(storedData);
@@ -222,35 +150,6 @@ async function triggerSocket(socket) {
     });
   });
 }
-
-// app.post("/api/dashboard/send-telegram", async (req, res) => {
-//   const groupIds = ["-4010824640", "-4084355967"];
-//   let interface = req.body.interface
-//   let internet = req.body.internet
-//   let speed = req.body.speed
-
-//   const options = {
-//     weekday: 'long',
-//     year: 'numeric',
-//     month: 'long',
-//     day: 'numeric',
-//     hour: 'numeric',
-//     minute: 'numeric',
-//     timeZoneName: 'short',
-//   };
-
-//   const locale = 'id-ID';
-
-//   const formattedDate = new Date().toLocaleString(locale, options);
-
-//   groupIds.forEach((groupId) => {
-//     telegram.sendMessage(groupId, 'Interface '+interface+' Internet '+internet+' Mengalami down , '+formattedDate).then(() => {
-//       console.log(`Message sent to group ${groupId}`);
-//     }).catch((error) => {
-//       console.error(`Error sending message to group ${groupId}:`, error);
-//     });
-//   });
-// })
 const checkApiData = async () => {
   try {
     const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
@@ -271,7 +170,9 @@ const checkApiData = async () => {
   }
 };
 
-setInterval(checkApiData, 5000);
+if (id > 0) {
+  setInterval(checkApiData, 5000);
+}
 
 io.on("connection", async (socket) => {
   socket.on("system-resource", async ({ router }) => {
@@ -297,7 +198,10 @@ io.on("connection", async (socket) => {
 
   socket.on("bandwith", async ({ router }) => {
     try {
-      id = router;
+      if (id == 0) {
+        id = router;
+      }
+
       const data = await getCurrentTxRxIo({ router });
 
       if (bandwidth) {

@@ -54,6 +54,19 @@ module.exports = {
     }
   },
 
+  // NOTE get active route
+  getActive: async (req, res) => {
+    try {
+      let data = await database.query(`
+        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
+      `);
+
+      return helper.response(res, 200, "Router berhasil ditemukan", data[0][0]);
+    } catch (error) {
+      return helper.response(res, 400, "Error : " + error, error);
+    }
+  },
+
   // NOTE deactive route
   deactive: async (req, res) => {
     try {
