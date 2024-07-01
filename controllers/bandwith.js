@@ -100,14 +100,11 @@ module.exports = {
 
   getCurrentTxRxIo: async ({ router }) => {
     try {
-      let result;
-
       const query = await database.query(`
           SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active' AND id = '${router}'
         `);
 
       const id = query[0][0].id;
-      const ethernet = query[0][0].ethernet;
 
       const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
 
@@ -119,13 +116,7 @@ module.exports = {
 
       const data = response.data;
 
-      for (let j = 0; j < data.length; j++) {
-        if (data[j].name == ethernet) {
-          return data[j];
-        }
-      }
-
-      return [];
+      return data;
     } catch (errorRes) {
       console.log(errorRes);
       return errorRes;

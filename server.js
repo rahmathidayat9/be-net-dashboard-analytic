@@ -49,6 +49,8 @@ const io = new Server(server, {
 // const bot = new Telegraf(process.env.BOT_TOKEN);
 // const telegram = new Telegram(process.env.BOT_TOKEN);
 
+let id = 0;
+let bandwidth = null;
 const groupIds = ["-4010824640", "-4084355967"];
 
 const accessLogStream = fs.createWriteStream(
@@ -249,6 +251,27 @@ async function triggerSocket(socket) {
 //     });
 //   });
 // })
+const checkApiData = async () => {
+  try {
+    const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
+
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (JSON.stringify(bandwidth) !== JSON.stringify(response.data)) {
+      bandwidth = response.data;
+
+      io.sockets.emit("new-bandwith", bandwidth);
+    }
+  } catch (error) {
+    console.error("Error fetching API data:", error);
+  }
+};
+
+setInterval(checkApiData, 5000);
 
 io.on("connection", async (socket) => {
   socket.on("system-resource", async ({ router }) => {
@@ -274,7 +297,12 @@ io.on("connection", async (socket) => {
 
   socket.on("bandwith", async ({ router }) => {
     try {
+      id = router;
       const data = await getCurrentTxRxIo({ router });
+
+      if (bandwidth) {
+        socket.emit("new-bandwith", bandwidth);
+      }
 
       io.emit("new-bandwith", data);
     } catch (error) {
