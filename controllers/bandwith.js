@@ -1,5 +1,6 @@
-const axios = require("axios");
+const RouterClient = require("@mhycy/routeros-client");
 const moment = require("moment");
+const axios = require("axios");
 
 const database = require("../config/database");
 const helper = require("../helpers");
@@ -99,40 +100,32 @@ module.exports = {
 
   getCurrentTxRxIo: async ({ router }) => {
     try {
-      let today = moment().format("YYYY-MM-DD");
+      let result;
 
-      const activeRouter = await database.query(`
-        SELECT * FROM routers WHERE id = '${router}'
-      `);
-
-      const ethernet = activeRouter[0][0].ethernet;
-
-      const lowest = await database.query(`
-        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}' ORDER BY id ASC LIMIT 1
+      const query = await database.query(`
+          SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active' AND id = '${router}'
         `);
 
-      const highest = await database.query(`
-        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router}' AND name = '${ethernet}' ORDER BY id DESC LIMIT 1
-      `);
+      const id = query[0][0].id;
+      const ethernet = query[0][0].ethernet;
 
-      if (lowest[0].length == 0) {
-        return {
-          ethernet,
-          rx_byte: 0,
-          tx_byte: 0,
-        };
+      const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = response.data;
+
+      for (let j = 0; j < data.length; j++) {
+        if (data[j].name == ethernet) {
+          return data[j];
+        }
       }
 
-      const rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
-      const tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
-
-      data = {
-        ethernet,
-        rx_byte,
-        tx_byte,
-      };
-
-      return data;
+      return [];
     } catch (errorRes) {
       console.log(errorRes);
       return errorRes;

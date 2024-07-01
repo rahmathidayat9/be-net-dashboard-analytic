@@ -13,14 +13,14 @@
     referrerpolicy="no-referrer"
   ></script>
   <script>
-    var socket = io("https://analytic.digicx.id");
+    var socket = io("http://localhost:3000");
 
     socket.on("connect", () => {
       console.log("connected to server");
 
-      socket.emit("dhcp-servers", { router: "1" });
+      socket.emit("bandwith", { router: "1" });
       // socket.emit("top-interface-graph");
-      socket.on("new-servers", function (data) {
+      socket.on("new-bandwith", function (data) {
         console.log("Received new data from server:", data);
       });
     });

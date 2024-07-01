@@ -116,38 +116,6 @@ function formatBytes(bytes) {
   return parseInt(kilobyte);
 }
 
-app.get("/api/dashboard/get-interfaces", async (req, res) => {
-  try {
-    const apiUrl = process.env.MICROTIC_API_ENV + "api";
-
-    /* Get all interface dynamicaly of the uuid device before live monitoring */
-    const interfaceUrl = "/router/interface/list/print";
-    const interfaceParams = {
-      uuid: req.query.uuid,
-    };
-
-    const interfaceResponse = await axios.post(
-      apiUrl + interfaceUrl,
-      interfaceParams
-    );
-    const interfaceResponseData = interfaceResponse.data.massage;
-
-    let arrData = [];
-
-    interfaceResponseData.forEach((value, index) => {
-      arrData.push(value.name);
-    });
-
-    // Save data to local storage
-    localStorage.setItem("dataInterface", JSON.stringify(arrData));
-
-    res.send(arrData);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "An error occurred" });
-  }
-});
-
 const clientSocket = ioClient(process.env.MICROTIC_API_ENV);
 let isProcessing = false;
 
@@ -283,44 +251,6 @@ async function triggerSocket(socket) {
 // })
 
 io.on("connection", async (socket) => {
-  let interfaceLive;
-
-  app.get("/api/dashboard/start", async (req, res) => {
-    if (!interfaceLive) {
-      interfaceLive = cron.schedule("* * * * * *", async () => {
-        let router = await database.query(`
-          SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
-        `);
-
-        if (router.length == 1) {
-          router = router[0][0];
-
-          const id = router.id;
-
-          const systemResource = await getDataSystemResourceIo({ id });
-          const txRx = await getCurrentTxRxIo({ id });
-
-          io.emit("system-resource", systemResource);
-          io.emit("tx-rx", txRx);
-        }
-      });
-
-      res.send("start");
-    } else {
-      res.send("Cron job is already running");
-    }
-  });
-
-  app.get("/api/dashboard/stop", async (req, res) => {
-    if (interfaceLive) {
-      interfaceLive.stop();
-      interfaceLive = null;
-      res.send("stop");
-    } else {
-      res.send("Cron job is not running");
-    }
-  });
-
   socket.on("system-resource", async ({ router }) => {
     try {
       const data = await getDataSystemResourceIo({ router });
