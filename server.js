@@ -51,7 +51,7 @@ const io = new Server(server, {
 
 let id = 0;
 let bandwidth = null;
-const groupIds = ["-4010824640", "-4084355967"];
+// const groupIds = ["-4010824640", "-4084355967"];
 
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "storage/access.log"),
@@ -140,39 +140,23 @@ clientSocket.on("ether1", (data) => {
   isProcessing = false;
 });
 
-async function triggerSocket(socket) {
-  const storedData = JSON.parse(localStorage.getItem("dataInterface"));
-  console.log(storedData);
-  storedData.forEach((value, index) => {
-    socket.emit(value, {
-      download: getRandomNumber(10000, 4500000),
-      upload: getRandomNumber(10000, 4500000),
-    });
-  });
-}
 const checkApiData = async () => {
-  try {
-    const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
+  const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
 
-    const response = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  const response = await axios.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-    if (JSON.stringify(bandwidth) !== JSON.stringify(response.data)) {
-      bandwidth = response.data;
+  if (JSON.stringify(bandwidth) !== JSON.stringify(response.data)) {
+    bandwidth = response.data;
 
-      io.sockets.emit("new-bandwith", bandwidth);
-    }
-  } catch (error) {
-    console.error("Error fetching API data:", error);
+    io.sockets.emit("new-bandwith", bandwidth);
   }
 };
 
-if (id > 0) {
-  setInterval(checkApiData, 5000);
-}
+setInterval(checkApiData, 5000);
 
 io.on("connection", async (socket) => {
   socket.on("system-resource", async ({ router }) => {
@@ -198,9 +182,7 @@ io.on("connection", async (socket) => {
 
   socket.on("bandwith", async ({ router }) => {
     try {
-      if (id == 0) {
-        id = router;
-      }
+      id = router;
 
       const data = await getCurrentTxRxIo({ router });
 

@@ -13,7 +13,8 @@
     referrerpolicy="no-referrer"
   ></script>
   <script>
-    var socket = io("https://analytic.digicx.id");
+    //var socket = io("https://analytic.digicx.id");
+    var socket = io("http://localhost:3000");
 
     socket.on("connect", () => {
       console.log("connected to server");
