@@ -5,26 +5,14 @@ const middleware = require("../middleware");
 
 const router = express.Router();
 
-router.get("/", controller.index);
-router.get("/count/:status", controller.count);
-router.get("/:id", controller.show);
-router.post("/", controller.store);
-router.post(
-  "/closed/:id",
-  controller.closed
-);
-router.put(
-  "/pending/:id",
-  controller.pending
-);
-router.post("/reply/:id", controller.reply);
-router.post(
-  "/status/:id",
-  controller.status
-);
-router.delete(
-  "/:id",
-  controller.destroy
-);
+router.get("/", middleware.auth, controller.index);
+router.get("/count/:status", middleware.auth, controller.count);
+router.get("/:id", middleware.auth, controller.show);
+router.post("/", middleware.auth, controller.store);
+router.post("/closed/:id", middleware.auth, controller.closed);
+router.put("/pending/:id", middleware.auth, controller.pending);
+router.post("/reply/:id", middleware.auth, controller.reply);
+router.post("/status/:id", middleware.auth, controller.status);
+router.delete("/:id", middleware.auth, controller.destroy);
 
 module.exports = router;

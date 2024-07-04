@@ -198,34 +198,79 @@ module.exports = {
           : null;
 
       let data = [];
-
-      let exists = await database.query(`
-        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
-      `);
+      let groupDate = [];
+      let records = [];
 
       if (start_date && end_date) {
-        exists = await database.query(`
-          SELECT * FROM top_interfaces WHERE router = '${router.id}' AND name = '${router.ethernet}' AND date::date <= '${end_date}'::date AND date::date >= '${start_date}'::date ORDER BY counter ASC
-        `);
-      }
+        start_date = new Date(start_date);
+        end_date = new Date(end_date);
 
-      if (exists[0].length == 0) {
-        return helper.response(res, 200, "No data", data);
-      }
+        const dates = [];
 
-      for (i = 0; i < exists[0].length; i++) {
-        data.push({
-          created_at: exists[0][i].created_at,
-          rx_byte: exists[0][i].rx_byte,
-          tx_byte: exists[0][i].tx_byte,
+        for (
+          let d = new Date(start_date);
+          d <= end_date;
+          d.setDate(d.getDate() + 1)
+        ) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+          const day = String(d.getDate()).padStart(2, "0");
+          const formattedDate = `${year}-${month}-${day}`;
+
+          dates.push(formattedDate);
+        }
+
+        for (i = 0; i < dates.length; i++) {
+          const exists = await database.query(`
+            SELECT * FROM top_interfaces WHERE date::date = '${dates[i]}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
+            `);
+
+          if (exists[0].length == 0) {
+            groupDate.push({
+              date: dates[i],
+              data: [],
+            });
+          } else {
+            for (j = 0; j < exists[0].length; j++) {
+              records.push({
+                created_at: exists[0][j].created_at,
+                rx_byte: exists[0][j].rx_byte,
+                tx_byte: exists[0][j].tx_byte,
+              });
+            }
+
+            groupDate.push({
+              date: dates[i],
+              data: records,
+            });
+          }
+        }
+
+        data = groupDate;
+      } else {
+        const exists = await database.query(`
+              SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
+            `);
+
+        for (i = 0; i < exists[0].length; i++) {
+          records.push({
+            records: exists[0][i].created_at,
+            rx_byte: exists[0][i].rx_byte,
+            tx_byte: exists[0][i].tx_byte,
+          });
+        }
+
+        groupDate.push({
+          date: today,
+          data: records,
         });
+
+        data = groupDate;
       }
 
-      return helper.response(res, 200, "Data ditemukan", {
-        today,
-        data,
-      });
+      return helper.response(res, 200, "Data ditemukan", data);
     } catch (error) {
+      console.log(error);
       return helper.response(res, 400, "Error : " + error, error);
     }
   },
@@ -241,8 +286,6 @@ module.exports = {
       }
 
       router = router[0][0];
-
-      let today = moment().format("YYYY-MM-DD");
 
       let data = [];
 
