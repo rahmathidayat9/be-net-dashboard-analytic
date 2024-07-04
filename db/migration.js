@@ -255,6 +255,21 @@ const migrate = async () => {
       `
     );
 
+    await database.query(
+      `
+        INSERT INTO routers(host,name,username,pass,port,ethernet,status, created_at) VALUES(
+            '10.0.0.28',
+            'local',
+            'admin',
+            'Secure2023!',
+            '8042',
+            'ether1',
+            'deactive',
+            '${await helpers.getFormatedTime("datetime")}'
+        )
+      `
+    );
+
     console.log("Migration completed");
 
     process.exit();
