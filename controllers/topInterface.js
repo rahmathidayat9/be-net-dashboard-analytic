@@ -182,13 +182,32 @@ module.exports = {
 
       router = router[0][0];
 
-      let today = moment().format("YYYY-MM-DD");
+      let today =
+        req.query.date !== undefined && req.query.date !== ""
+          ? moment(req.query.date).format("YYYY-MM-DD")
+          : moment().format("YYYY-MM-DD");
+
+      let start_date =
+        req.query.start_date !== undefined && req.query.start_date !== ""
+          ? moment(req.query.start_date).format("YYYY-MM-DD")
+          : null;
+
+      let end_date =
+        req.query.end_date !== undefined && req.query.end_date !== ""
+          ? moment(req.query.end_date).format("YYYY-MM-DD")
+          : null;
 
       let data = [];
 
-      const exists = await database.query(`
+      let exists = await database.query(`
         SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
       `);
+
+      if (start_date && end_date) {
+        exists = await database.query(`
+          SELECT * FROM top_interfaces WHERE router = '${router.id}' AND name = '${router.ethernet}' AND date::date <= '${end_date}'::date AND date::date >= '${start_date}'::date ORDER BY counter ASC
+        `);
+      }
 
       if (exists[0].length == 0) {
         return helper.response(res, 200, "No data", data);

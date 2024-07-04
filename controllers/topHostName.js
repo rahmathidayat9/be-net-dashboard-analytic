@@ -144,7 +144,7 @@ module.exports = {
       //   }
       // }
 
-      data.sort((a, b) => (a.total < b.total ? 1 : -1));
+      data.sort((a, b) => (a.byte_down < b.byte_down ? 1 : -1));
 
       return helper.response(res, 200, "Data ditemukan", {
         today,
