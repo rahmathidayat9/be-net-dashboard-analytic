@@ -30,7 +30,10 @@ const topInterfaceRouter = require("./routes/topInterface");
 const userRouter = require("./routes/user");
 const profileRoute = require("./routes/profile");
 const { getDataSystemResourceIo } = require("./controllers/systemResource");
-const { getGraphTopInterfaceIo } = require("./controllers/topInterface.js");
+const {
+  getGraphTopInterfaceIo,
+  getAllGraphTopInterfaceIo,
+} = require("./controllers/topInterface.js");
 const { getCurrentTxRxIo } = require("./controllers/bandwith");
 const { getDHCPServersIo } = require("./controllers/misc");
 
@@ -141,18 +144,20 @@ clientSocket.on("ether1", (data) => {
 });
 
 const checkApiData = async () => {
-  const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
+  if (id > 0) {
+    const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
 
-  const response = await axios.get(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (JSON.stringify(bandwidth) !== JSON.stringify(response.data)) {
-    bandwidth = response.data;
+    if (JSON.stringify(bandwidth) !== JSON.stringify(response.data)) {
+      bandwidth = response.data;
 
-    io.sockets.emit("new-bandwith", bandwidth);
+      io.sockets.emit("new-bandwith", bandwidth);
+    }
   }
 };
 
@@ -202,6 +207,17 @@ io.on("connection", async (socket) => {
       const data = await getGraphTopInterfaceIo();
 
       io.emit("new-graph", data);
+    } catch (error) {
+      console.log(error);
+      io.emit("error", { message: error.message });
+    }
+  });
+
+  socket.on("top-interface-all-graph", async () => {
+    try {
+      const data = await getAllGraphTopInterfaceIo();
+
+      io.emit("new-all-graph", data);
     } catch (error) {
       console.log(error);
       io.emit("error", { message: error.message });

@@ -244,4 +244,44 @@ module.exports = {
       return error;
     }
   },
+  getAllGraphTopInterfaceIo: async (req, res) => {
+    try {
+      let router = await database.query(`
+        SELECT * FROM routers WHERE deleted_at IS NULL AND ethernet IS NOT NULL order by status
+      `);
+
+      let data = [];
+
+      if (router[0].length == 0) {
+        return helper.response(res, 200, "No active router", data);
+      }
+
+      for (let h = 0; h < router[0].length; h++) {
+        let today = moment().format("YYYY-MM-DD");
+
+        const exists = await database.query(`
+          SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router[0][h].id}' AND name = '${router[0][h].ethernet}' ORDER BY counter ASC
+        `);
+
+        let graph = [];
+
+        for (i = 0; i < exists[0].length; i++) {
+          graph.push({
+            created_at: exists[0][i].created_at,
+            rx_byte: exists[0][i].rx_byte,
+            tx_byte: exists[0][i].tx_byte,
+          });
+        }
+
+        data.push({
+          name: router[0][h].name,
+          graph,
+        });
+      }
+
+      return data;
+    } catch (error) {
+      return error;
+    }
+  },
 };
