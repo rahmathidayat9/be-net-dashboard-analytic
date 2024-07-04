@@ -53,6 +53,7 @@ const io = new Server(server, {
 // const telegram = new Telegram(process.env.BOT_TOKEN);
 
 let id = 0;
+let idServer = 0;
 let bandwidth = null;
 // const groupIds = ["-4010824640", "-4084355967"];
 
@@ -112,37 +113,6 @@ app.use("/api/system-resource", systemResourceRouter);
 app.use("/api/users", userRouter);
 app.use("/api/profile1", profileRoute);
 
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function formatBytes(bytes) {
-  let kilobyte = bytes / 1024;
-  return parseInt(kilobyte);
-}
-
-const clientSocket = ioClient(process.env.MICROTIC_API_ENV);
-let isProcessing = false;
-
-clientSocket.on("ether1", (data) => {
-  if (isProcessing) {
-    // If a request is already being processed, ignore this one
-    return;
-  }
-
-  isProcessing = true;
-
-  data.data.forEach((value, index) => {
-    let obj = value;
-    const uploadData = formatBytes(obj["tx-bits-per-second"]);
-    const downloadData = formatBytes(obj["rx-bits-per-second"]);
-    console.log(uploadData);
-    console.log(downloadData);
-  });
-
-  isProcessing = false;
-});
-
 const checkApiData = async () => {
   if (id > 0) {
     const url = `${process.env.MICROTIC_API_ENV}interfaces/monitor/${id}`;
@@ -161,7 +131,16 @@ const checkApiData = async () => {
   }
 };
 
+const checkDHCPServer = async () => {
+  if (idServer && idServer > 0) {
+    const data = await getDHCPServersIo({ idServer });
+
+    io.emit("new-servers", data);
+  }
+};
+
 setInterval(checkApiData, 5000);
+setInterval(checkDHCPServer, 5000);
 
 io.on("connection", async (socket) => {
   socket.on("system-resource", async ({ router }) => {
@@ -176,6 +155,8 @@ io.on("connection", async (socket) => {
 
   socket.on("dhcp-servers", async ({ router }) => {
     try {
+      idServer = router;
+
       const data = await getDHCPServersIo({ router });
 
       io.emit("new-servers", data);

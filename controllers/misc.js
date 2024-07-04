@@ -51,10 +51,17 @@ module.exports = {
 
   getDHCPServersIo: async ({ router }) => {
     try {
-      let creds = await database.query(`
+      let creds;
+
+      if (router) {
+        creds = await database.query(`
         SELECT * FROM routers WHERE id = '${router}' AND deleted_at IS NULL
       `);
-
+      } else {
+        creds = await database.query(`
+          SELECT * FROM routers WHERE status = 'active' AND deleted_at IS NULL
+        `);
+      }
       const mikrotik = await helper.mikrotikCommand(
         creds[0][0],
         "/ip/dhcp-server/lease/print"

@@ -244,10 +244,11 @@ module.exports = {
       return error;
     }
   },
+
   getAllGraphTopInterfaceIo: async (req, res) => {
     try {
       let router = await database.query(`
-        SELECT * FROM routers WHERE deleted_at IS NULL AND ethernet IS NOT NULL order by status
+        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'active'
       `);
 
       let data = [];
@@ -256,11 +257,23 @@ module.exports = {
         return helper.response(res, 200, "No active router", data);
       }
 
-      for (let h = 0; h < router[0].length; h++) {
+      let ethernet = [];
+
+      const exists = await database.query(`
+        SELECT * FROM top_interfaces WHERE date::date = CURRENT_DATE AND router = '${router[0][0].id}' ORDER BY name
+      `);
+
+      exists[0].map((e) => {
+        if (!ethernet.includes(e.name)) {
+          ethernet.push(e.name);
+        }
+      });
+
+      for (let h = 0; h < ethernet.length; h++) {
         let today = moment().format("YYYY-MM-DD");
 
         const exists = await database.query(`
-          SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router[0][h].id}' AND name = '${router[0][h].ethernet}' ORDER BY counter ASC
+          SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router[0][0].id}' AND name = '${ethernet[h]}' ORDER BY counter ASC
         `);
 
         let graph = [];
@@ -274,7 +287,7 @@ module.exports = {
         }
 
         data.push({
-          name: router[0][h].name,
+          name: ethernet[h],
           graph,
         });
       }
