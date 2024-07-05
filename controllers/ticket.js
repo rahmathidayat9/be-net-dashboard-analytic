@@ -471,4 +471,49 @@ module.exports = {
       return helper.response(res, 400, "Error : " + err, err);
     }
   },
+
+  // NOTE create tiket
+  update: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      let { due_date, priority_id, status } = req.body;
+
+      if (!due_date || due_date == "" || due_date.length == 0) {
+      } else {
+        due_date = moment(due_date).format("YYYY-MM-DD");
+
+        await database.query(
+          `UPDATE tickets SET due_date = '${due_date}', updated_at = now() WHERE id = ${id}`
+        );
+      }
+
+      if (!priority_id || priority_id == "" || priority_id.length == 0) {
+      } else {
+        await database.query(
+          `UPDATE tickets SET priority_id = '${priority_id}', updated_at = now() WHERE id = ${id}`
+        );
+      }
+
+      if (!status || status == "" || status.length == 0) {
+      } else {
+        await database.query(
+          `UPDATE tickets SET status = '${status}', updated_at = now() WHERE id = ${id}`
+        );
+      }
+
+      const data = await database.query(
+        `SELECT * FROM tickets WHERE id = ${id}`
+      );
+
+      return helper.response(
+        res,
+        200,
+        "Tiket berhasil diperbaharui",
+        data[0][0]
+      );
+    } catch (err) {
+      return helper.response(res, 400, "Error : " + err, err);
+    }
+  },
 };

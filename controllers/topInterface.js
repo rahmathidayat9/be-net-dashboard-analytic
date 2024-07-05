@@ -199,7 +199,6 @@ module.exports = {
 
       let data = [];
       let groupDate = [];
-      let records = [];
 
       if (start_date && end_date) {
         start_date = new Date(start_date);
@@ -221,6 +220,8 @@ module.exports = {
         }
 
         for (i = 0; i < dates.length; i++) {
+          records = [];
+
           const exists = await database.query(`
             SELECT * FROM top_interfaces WHERE date::date = '${dates[i]}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
             `);
@@ -228,20 +229,47 @@ module.exports = {
           if (exists[0].length == 0) {
             groupDate.push({
               date: dates[i],
-              data: [],
+              data: {
+                rx_byte: 0,
+                tx_byte: 0,
+              },
             });
           } else {
-            for (j = 0; j < exists[0].length; j++) {
-              records.push({
-                created_at: exists[0][j].created_at,
-                rx_byte: exists[0][j].rx_byte,
-                tx_byte: exists[0][j].tx_byte,
-              });
-            }
+            // for (j = 0; j < exists[0].length; j++) {
+            //   records.push({
+            //     created_at: exists[0][j].created_at,
+            //     rx_byte: exists[0][j].rx_byte,
+            //     tx_byte: exists[0][j].tx_byte,
+            //   });
+            // }
+            // groupDate.push({
+            //   date: dates[i],
+            //   data: records,
+            // });
+            const lowest = await database.query(`
+              SELECT * FROM top_interfaces WHERE date::date = '${dates[i]}'  AND router = '${router.id}'  AND name = '${router.ethernet}' ORDER BY id ASC LIMIT 1
+            `);
+
+            const highest = await database.query(`
+              SELECT * FROM top_interfaces WHERE date::date = '${dates[i]}'  AND router = '${router.id}'  AND name = '${router.ethernet}' ORDER BY id DESC LIMIT 1
+            `);
+
+            const rx_byte =
+              highest[0][0].rx_byte !== lowest[0][0].rx_byte
+                ? highest[0][0].rx_byte - lowest[0][0].rx_byte
+                : highest[0][0].rx_byte;
+
+            const tx_byte =
+              highest[0][0].tx_byte !== lowest[0][0].tx_byte
+                ? highest[0][0].tx_byte - lowest[0][0].tx_byte
+                : highest[0][0].tx_byte;
 
             groupDate.push({
               date: dates[i],
-              data: records,
+              data: {
+                rx_byte,
+                tx_byte,
+              },
             });
           }
         }
