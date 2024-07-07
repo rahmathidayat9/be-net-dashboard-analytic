@@ -235,17 +235,6 @@ module.exports = {
               },
             });
           } else {
-            // for (j = 0; j < exists[0].length; j++) {
-            //   records.push({
-            //     created_at: exists[0][j].created_at,
-            //     rx_byte: exists[0][j].rx_byte,
-            //     tx_byte: exists[0][j].tx_byte,
-            //   });
-            // }
-            // groupDate.push({
-            //   date: dates[i],
-            //   data: records,
-            // });
             const lowest = await database.query(`
               SELECT * FROM top_interfaces WHERE date::date = '${dates[i]}'  AND router = '${router.id}'  AND name = '${router.ethernet}' ORDER BY id ASC LIMIT 1
             `);
@@ -254,15 +243,22 @@ module.exports = {
               SELECT * FROM top_interfaces WHERE date::date = '${dates[i]}'  AND router = '${router.id}'  AND name = '${router.ethernet}' ORDER BY id DESC LIMIT 1
             `);
 
-            const rx_byte =
-              highest[0][0].rx_byte !== lowest[0][0].rx_byte
-                ? highest[0][0].rx_byte - lowest[0][0].rx_byte
-                : highest[0][0].rx_byte;
+            let rx_byte = highest[0][0].rx_byte;
+            let tx_byte = highest[0][0].tx_byte;
 
-            const tx_byte =
-              highest[0][0].tx_byte !== lowest[0][0].tx_byte
-                ? highest[0][0].tx_byte - lowest[0][0].tx_byte
-                : highest[0][0].tx_byte;
+            if (
+              highest[0][0].rx_byte !== lowest[0][0].rx_byte &&
+              highest[0][0].rx_byte < lowest[0][0].rx_byte
+            ) {
+              rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
+            }
+
+            if (
+              highest[0][0].tx_byte !== lowest[0][0].tx_byte &&
+              highest[0][0].tx_byte < lowest[0][0].tx_byte
+            ) {
+              tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+            }
 
             groupDate.push({
               date: dates[i],
@@ -277,23 +273,59 @@ module.exports = {
         data = groupDate;
       } else {
         const exists = await database.query(`
-              SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
-            `);
+          SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
+        `);
 
         for (i = 0; i < exists[0].length; i++) {
-          records.push({
-            records: exists[0][i].created_at,
+          data.push({
+            created_at: exists[0][i].created_at,
             rx_byte: exists[0][i].rx_byte,
             tx_byte: exists[0][i].tx_byte,
           });
         }
 
-        groupDate.push({
-          date: today,
-          data: records,
-        });
+        // if (exists[0].length == 0) {
+        //   data = {
+        //     date: today,
+        //     data: {
+        //       rx_byte: 0,
+        //       tx_byte: 0,
+        //     },
+        //   };
+        // } else {
+        // const lowest = await database.query(`
+        //     SELECT * FROM top_interfaces WHERE date::date = '${today}'  AND router = '${router.id}'  AND name = '${router.ethernet}' ORDER BY id ASC LIMIT 1
+        //   `);
 
-        data = groupDate;
+        // const highest = await database.query(`
+        //     SELECT * FROM top_interfaces WHERE date::date = '${today}'  AND router = '${router.id}'  AND name = '${router.ethernet}' ORDER BY id DESC LIMIT 1
+        //   `);
+
+        // let rx_byte = highest[0][0].rx_byte;
+        // let tx_byte = highest[0][0].tx_byte;
+
+        // if (
+        //   highest[0][0].rx_byte !== lowest[0][0].rx_byte &&
+        //   highest[0][0].rx_byte < lowest[0][0].rx_byte
+        // ) {
+        //   rx_byte = highest[0][0].rx_byte - lowest[0][0].rx_byte;
+        // }
+
+        // if (
+        //   highest[0][0].tx_byte !== lowest[0][0].tx_byte &&
+        //   highest[0][0].tx_byte < lowest[0][0].tx_byte
+        // ) {
+        //   tx_byte = highest[0][0].tx_byte - lowest[0][0].tx_byte;
+        // }
+
+        // data = {
+        //   date: today,
+        //   data: {
+        //     rx_byte,
+        //     tx_byte,
+        //   },
+        // };
+        // }
       }
 
       return helper.response(res, 200, "Data ditemukan", data);
@@ -318,7 +350,7 @@ module.exports = {
       let data = [];
 
       const exists = await database.query(`
-        SELECT * FROM top_interfaces WHERE date::date = '${today}' AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
+        SELECT * FROM top_interfaces WHERE date::date = CURRENT_DATE AND router = '${router.id}' AND name = '${router.ethernet}' ORDER BY counter ASC
       `);
 
       for (i = 0; i < exists[0].length; i++) {
