@@ -24,14 +24,6 @@ module.exports = {
     try {
       const id = req.params.id;
 
-      const valid = await database.query(`
-        SELECT * FROM routers WHERE deleted_at IS NULL AND status = 'deactive' AND id = ${id}
-      `);
-
-      if (valid[0].length == 0) {
-        return helper.response(res, 400, "Data tidak ditemukan");
-      }
-
       await database.query(
         `
           UPDATE routers SET status = 'deactive'

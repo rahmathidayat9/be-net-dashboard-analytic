@@ -54,6 +54,7 @@ const io = new Server(server, {
 
 let id = 0;
 let idServer = 0;
+let idSystemResource = 0;
 let bandwidth = null;
 // const groupIds = ["-4010824640", "-4084355967"];
 
@@ -139,6 +140,15 @@ const checkDHCPServer = async () => {
   }
 };
 
+const cehckSystemResource = async () => {
+  if (idSystemResource && idSystemResource > 0) {
+    const data = await getDataSystemResourceIo({ idSystemResource });
+
+    io.emit("new-data", data);
+  }
+};
+
+setInterval(cehckSystemResource, 5000);
 setInterval(checkApiData, 5000);
 setInterval(checkDHCPServer, 5000);
 

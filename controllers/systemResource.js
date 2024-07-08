@@ -141,39 +141,38 @@ module.exports = {
 
   getDataSystemResourceIo: async ({ router }) => {
     try {
-      const today = moment().format("YYYY-MM-DD");
-
-      const log = await database.query(`
-        SELECT * FROM system_resources WHERE router = '${router}' AND  created_at::date = '${today}' ORDER BY id
+      let routers = await database.query(`
+          SELECT * FROM routers WHERE id = '${router}'
       `);
 
-      if (log[0].length == 0) {
-        return [];
-      }
+      mikrotik = await helper.mikrotikCommand(
+        routers[0][0],
+        "/system/resource/print"
+      );
 
-      let cpus = [];
-      let memories = [];
-      let hdds = [];
+      let data = [];
 
-      log[0].map((l) => {
-        cpus.push(l.cpu);
-        hdds.push(l.hdd);
-        memories.push(l.memory);
+      mikrotik.map((m) => {
+        const freeMemory = parseInt(m["free-memory"]);
+        const totalMemory = parseInt(m["total-memory"]);
+
+        const usedMemory = totalMemory - freeMemory;
+
+        const memoryUsagePercentage = (usedMemory / totalMemory) * 100;
+
+        const freeHDD = parseInt(m["free-hdd-space"]);
+        const totalHDD = parseInt(m["total-hdd-space"]);
+
+        const usedHDD = totalHDD - freeHDD;
+
+        const HDDUsagePercentage = (usedHDD / totalHDD) * 100;
+
+        data = {
+          cpu: m["cpu-load"],
+          hdd: parseFloat(HDDUsagePercentage).toFixed(2),
+          memory: parseFloat(memoryUsagePercentage).toFixed(2),
+        };
       });
-
-      cpus = cpus.map(Number);
-      hdds = hdds.map(Number);
-      memories = memories.map(Number);
-
-      const cpu = helper.getAveragefromArray(cpus).toFixed(2);
-      const memory = helper.getAveragefromArray(memories).toFixed(2);
-      const hdd = helper.getAveragefromArray(hdds).toFixed(2);
-
-      const data = {
-        cpu: cpu + "%",
-        hdd: hdd + "%",
-        memory: memory + "%",
-      };
 
       return data;
     } catch (error) {

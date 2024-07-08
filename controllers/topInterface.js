@@ -342,7 +342,7 @@ module.exports = {
       `);
 
       if (router[0].length == 0) {
-        return helper.response(res, 200, "No active router", data);
+        return [];
       }
 
       router = router[0][0];
